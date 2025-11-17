@@ -1,0 +1,65 @@
+<%- include('../partials/headers/__header-dashboard.ejs', { title: 'Dashboard Pustakawan' }) %>
+<%- include('../partials/navs/__nav-side-pustakawan.ejs') %>
+<%- include('../partials/messages/__messages-dashboard.ejs') %>
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 col-sm-6 col-lg-4 grid-margin stretch-card">
+                <div class="stat-card card w-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="stat-label">Blog Valid</div>
+                                <div
+                                    class="stat-number"
+                                    data-count="<%= countAllBlogValid ? countAllBlogValid.count_all_valid : 0 %>"
+                                >
+                                    <%= countAllBlogValid ? countAllBlogValid.count_all_valid : 0 %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4 grid-margin stretch-card">
+                <div class="stat-card card w-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="stat-label">Blog Tidak Valid</div>
+                                <div
+                                    class="stat-number"
+                                    data-count="<%= countAllBlogTidakValid ? countAllBlogTidakValid.count_all_tidak_valid : 0 %>"
+                                >
+                                    <%= countAllBlogTidakValid ? countAllBlogTidakValid.count_all_tidak_valid : 0 %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4 grid-margin stretch-card">
+                <div class="stat-card card w-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="stat-label">Blog Dalam Proses</div>
+                                <div
+                                    class="stat-number"
+                                    data-count="<%= countAllBlogProses ? countAllBlogProses.count_all_proses : 0 %>"
+                                >
+                                    <%= countAllBlogProses ? countAllBlogProses.count_all_proses : 0 %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/scripts/__script-dashboard.ejs') %>

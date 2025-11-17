@@ -1,4 +1,4 @@
-<%- include('../../partials/headers/__header-dashboard.ejs', { title: 'Edit Kategori' }) %>
+<%- include('../../partials/headers/__header-dashboard.ejs', { title: 'Tambah Kategori' }) %>
 <%- include('../../partials/navs/__nav-side-pustakawan.ejs') %>
 <%- include('../../partials/messages/__messages-dashboard.ejs') %>
 
@@ -8,11 +8,11 @@
             <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title">Edit Kategori</h4>
-                  <form action="/pustakawan/kategori/update/<%= data.id %>" method="POST" data-loading>
+                  <h4 class="card-title">Tambah Kategori</h4>
+                  <form action="/pustakawan/kategori/create" method="POST" data-loading>
                     <div class="form-group">
                       <label for="nama_kategori">Nama Kategori</label>
-                      <input type="text" class="form-control" id="nama_kategori" name="nama_kategori" value="<%= data.nama_kategori %>" placeholder="Masukkan nama kategori" required>
+                      <input type="text" class="form-control" id="nama_kategori" name="nama_kategori" placeholder="Masukkan nama kategori" value="<%= (typeof data != 'undefined' && data.nama_kategori) || '' %>" required>
                     </div>
                     <div class="d-flex">
                       <button type="submit" class="btn btn-primary mr-2">Simpan</button>

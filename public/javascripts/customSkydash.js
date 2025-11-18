@@ -294,11 +294,115 @@
     }
 
     function setupKategoriModal() {
-        // Form akan submit secara otomatis dengan action dan method yang sudah diatur di HTML
+        var button = document.getElementById('btnSimpanKategori');
+        var input = document.getElementById('nama_kategori_modal');
+        var formBlog = document.getElementById('formBlog');
+        if (!button || !input) return;
+
+        button.addEventListener('click', function() {
+            var namaKategori = input.value.trim();
+            if (!namaKategori) {
+                alert('Nama kategori tidak boleh kosong');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('nama_kategori', namaKategori);
+
+            if (formBlog) {
+                var judul = formBlog.querySelector('[name="judul"]');
+                var ringkasan = formBlog.querySelector('[name="ringkasan"]');
+                var nama_pembuat = formBlog.querySelector('[name="nama_pembuat"]');
+                var isi = formBlog.querySelector('[name="isi"]');
+                var kategoriInputs = formBlog.querySelectorAll('[name="kategori[]"]:checked');
+                var tagInputs = formBlog.querySelectorAll('[name="tag[]"]:checked');
+                var sumberInputs = formBlog.querySelectorAll('[name="sumber[]"]');
+
+                if (judul) formData.append('judul', judul.value);
+                if (ringkasan) formData.append('ringkasan', ringkasan.value);
+                if (nama_pembuat) formData.append('nama_pembuat', nama_pembuat.value);
+                if (isi) formData.append('isi', isi.value);
+                kategoriInputs.forEach(function(input) {
+                    formData.append('kategori[]', input.value);
+                });
+                tagInputs.forEach(function(input) {
+                    formData.append('tag[]', input.value);
+                });
+                sumberInputs.forEach(function(input) {
+                    if (input.value) formData.append('sumber[]', input.value);
+                });
+            }
+
+            fetch('/pustakawan/blog/kategori/create', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            })
+            .catch(function(err) {
+                console.error('Error:', err);
+                alert('Gagal menambahkan kategori');
+            });
+        });
     }
 
     function setupTagModal() {
-        // Form akan submit secara otomatis dengan action dan method yang sudah diatur di HTML
+        var button = document.getElementById('btnSimpanTag');
+        var input = document.getElementById('nama_tag_modal');
+        var formBlog = document.getElementById('formBlog');
+        if (!button || !input) return;
+
+        button.addEventListener('click', function() {
+            var namaTag = input.value.trim();
+            if (!namaTag) {
+                alert('Nama tag tidak boleh kosong');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('nama_tag', namaTag);
+
+            if (formBlog) {
+                var judul = formBlog.querySelector('[name="judul"]');
+                var ringkasan = formBlog.querySelector('[name="ringkasan"]');
+                var nama_pembuat = formBlog.querySelector('[name="nama_pembuat"]');
+                var isi = formBlog.querySelector('[name="isi"]');
+                var kategoriInputs = formBlog.querySelectorAll('[name="kategori[]"]:checked');
+                var tagInputs = formBlog.querySelectorAll('[name="tag[]"]:checked');
+                var sumberInputs = formBlog.querySelectorAll('[name="sumber[]"]');
+
+                if (judul) formData.append('judul', judul.value);
+                if (ringkasan) formData.append('ringkasan', ringkasan.value);
+                if (nama_pembuat) formData.append('nama_pembuat', nama_pembuat.value);
+                if (isi) formData.append('isi', isi.value);
+                kategoriInputs.forEach(function(input) {
+                    formData.append('kategori[]', input.value);
+                });
+                tagInputs.forEach(function(input) {
+                    formData.append('tag[]', input.value);
+                });
+                sumberInputs.forEach(function(input) {
+                    if (input.value) formData.append('sumber[]', input.value);
+                });
+            }
+
+            fetch('/pustakawan/blog/tag/create', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            })
+            .catch(function(err) {
+                console.error('Error:', err);
+                alert('Gagal menambahkan tag');
+            });
+        });
     }
 
     function initQuillEditor(form) {

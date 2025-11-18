@@ -133,7 +133,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="formTambahKategori" action="/pustakawan/kategori/create-ajax" method="POST">
+                <form id="formTambahKategori">
                     <div class="form-group">
                         <label for="nama_kategori_modal">Nama Kategori</label>
                         <input type="text" class="form-control" id="nama_kategori_modal" name="nama_kategori" required>
@@ -142,7 +142,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                <button type="submit" form="formTambahKategori" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-primary" id="btnSimpanKategori">Simpan</button>
             </div>
         </div>
     </div>
@@ -158,7 +158,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="formTambahTag" action="/pustakawan/tag/create-ajax" method="POST">
+                <form id="formTambahTag">
                     <div class="form-group">
                         <label for="nama_tag_modal">Nama Tag</label>
                         <input type="text" class="form-control" id="nama_tag_modal" name="nama_tag" required>
@@ -167,7 +167,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
-                <button type="submit" form="formTambahTag" class="btn btn-primary">Simpan</button>
+                <button type="button" class="btn btn-primary" id="btnSimpanTag">Simpan</button>
             </div>
         </div>
     </div>

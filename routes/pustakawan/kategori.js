@@ -62,32 +62,6 @@ router.post('/create', authPustakawan, async (req, res) => {
     }
 })
 
-router.post('/create-ajax', authPustakawan, async (req, res) => {
-    try {
-        const {nama_kategori} = req.body
-
-        const data = {nama_kategori}
-
-        if (!data.nama_kategori) {
-            req.flash("error", "Nama kategori tidak boleh kosong")
-            return res.redirect('/pustakawan/blog/buat')
-        }
-
-        if (await Kategori.checkKategoriCreate(data)) {
-            req.flash("error", "Kategori sudah dibuat")
-            return res.redirect('/pustakawan/blog/buat')
-        }
-
-        await Kategori.store(data)
-        req.flash('success', 'Kategori berhasil ditambahkan')
-        res.redirect('/pustakawan/blog/buat')
-    } catch (err) {
-        console.error(err)
-        req.flash('error', "Internal Server Error")
-        return res.redirect('/pustakawan/blog/buat')
-    }
-})
-
 router.get('/edit/:id', authPustakawan, async(req, res) => {
     try {
         const {id} = req.params

@@ -62,32 +62,6 @@ router.post('/create', authPustakawan, async (req, res) => {
     }
 })
 
-router.post('/create-ajax', authPustakawan, async (req, res) => {
-    try {
-        const {nama_tag} = req.body
-
-        const data = {nama_tag}
-
-        if (!data.nama_tag) {
-            req.flash("error", "Nama tag tidak boleh kosong")
-            return res.redirect('/pustakawan/blog/buat')
-        }
-
-        if (await Tag.checkTagCreate(data)) {
-            req.flash("error", "Tag sudah dibuat")
-            return res.redirect('/pustakawan/blog/buat')
-        }
-
-        await Tag.store(data)
-        req.flash('success', 'Tag berhasil ditambahkan')
-        res.redirect('/pustakawan/blog/buat')
-    } catch (err) {
-        console.error(err)
-        req.flash('error', "Internal Server Error")
-        return res.redirect('/pustakawan/blog/buat')
-    }
-})
-
 router.get('/edit/:id', authPustakawan, async(req, res) => {
     try {
         const {id} = req.params

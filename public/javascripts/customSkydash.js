@@ -602,7 +602,7 @@
                                                 // Insert gambar di posisi cursor
                                                 var range = quill.getSelection(true);
                                                 if (range) {
-                                                    quill.insertEmbed(range.index, 'image', data.url);
+                                                quill.insertEmbed(range.index, 'image', data.url);
                                                 }
                                             } else {
                                                 alert('Gagal mengupload gambar');

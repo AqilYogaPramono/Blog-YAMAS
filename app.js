@@ -7,6 +7,7 @@ require('dotenv').config()
 const session = require('express-session')
 const flash = require('express-flash')
 
+const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
 
 const API = require('./routes/API')
@@ -52,6 +53,7 @@ app.use(session({
 
 app.use(flash())
 
+app.use('/', indexRouter)
 app.use('/', authRouter)
 
 app.use('/API', API)

@@ -1,0 +1,133 @@
+<%
+    const formData = (typeof data !== 'undefined' && data) ? data : {};
+    const toArray = (value) => {
+        if (typeof value === 'undefined' || value === null) return [];
+        return Array.isArray(value) ? value : [value];
+    };
+    const selectedKategori = toArray(formData.kategori || formData['kategori[]']).map(String);
+    const selectedTag = toArray(formData.tag || formData['tag[]']).map(String);
+    let sumberList = toArray(formData.sumber || formData['sumber[]']);
+    if (!sumberList.length) {
+        sumberList = [''];
+    }
+%>
+<%- include('../../../partials/headers/__header-dashboard.ejs', { title: 'Ubah Blog Proses' }) %>
+<%- include('../../../partials/navs/__nav-side-pustakawan.ejs', { layoutClass: 'blog-create-page' }) %>
+<%- include('../../../partials/messages/__messages-dashboard.ejs') %>
+
+<div class="main-panel blog-create-panel">
+    <div class="content-wrapper blog-create-content">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Ubah Blog</h4>
+                        <form id="formBlog" action="/pustakawan/blog-proses/update/<%= blog.id %>" method="POST" enctype="multipart/form-data" data-loading>
+                            <div class="form-group">
+                                <label for="judul">Judul <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="judul" name="judul" placeholder="Masukkan judul blog" value="<%= formData.judul || '' %>" required>
+                                <small class="form-text text-muted">Tautan akan dibuat otomatis dari judul</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ringkasan">Ringkasan <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="ringkasan" name="ringkasan" rows="3" placeholder="Masukkan ringkasan blog" required><%= formData.ringkasan || '' %></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="foto_cover">Foto Cover</label>
+                                <input type="file" class="form-control-file" id="foto_cover" name="foto_cover" accept="image/jpeg,image/jpg,image/png,image/webp" data-preview="previewFotoCover">
+                                <small class="form-text text-muted">Format yang diizinkan: JPG, JPEG, PNG, WEBP. Kosongkan jika tidak ingin mengubah foto cover.</small>
+                                <div id="previewFotoCoverContainer" class="blog-detail-cover mt-3" <%= blog.foto_cover ? '' : 'style="display:none;"' %>>
+                                    <div class="blog-cover-header">
+                                        <span class="blog-cover-label"><i class="mdi mdi-image"></i> Preview Foto Cover</span>
+                                    </div>
+                                    <img id="previewFotoCover" src="<%= blog.foto_cover || '' %>" alt="Preview foto cover" class="blog-cover-image">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nama_pembuat">Nama Pembuat <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nama_pembuat" name="nama_pembuat" value="<%= formData.nama_pembuat || pegawai.nama || '' %>" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Isi <span class="text-danger">*</span></label>
+                                <div id="editor" style="min-height: 400px;"></div>
+                                <textarea id="initialIsi" class="d-none"><%- formData.isi || blog.isi || '' %></textarea>
+                                <input type="hidden" id="isi" name="isi" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <div class="blog-multi-select-card">
+                                    <div class="blog-multi-select-head">
+                                        <p class="mb-0 text-muted">Pilih kategori</p>
+                                    </div>
+                                    <div id="kategoriList" class="blog-multi-select-grid">
+                                        <% if (Array.isArray(kategori) && kategori.length) { %>
+                                            <% kategori.forEach(function(item){ %>
+                                                <label class="blog-multi-option blog-multi-option--light" for="kategori<%= item.id %>">
+                                                    <input class="blog-multi-option__checkbox" type="checkbox" name="kategori[]" value="<%= item.id %>" id="kategori<%= item.id %>" <%= selectedKategori.includes(String(item.id)) ? 'checked' : '' %>>
+                                                    <span class="blog-multi-option__label"><%= item.nama_kategori %></span>
+                                                </label>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <p class="text-muted mb-0">Belum ada kategori</p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Tag</label>
+                                <div class="blog-multi-select-card">
+                                    <div class="blog-multi-select-head">
+                                        <p class="mb-0 text-muted">Pilih tag</p>
+                                    </div>
+                                    <div id="tagList" class="blog-multi-select-grid">
+                                        <% if (Array.isArray(tag) && tag.length) { %>
+                                            <% tag.forEach(function(item){ %>
+                                                <label class="blog-multi-option blog-multi-option--light" for="tag<%= item.id %>">
+                                                    <input class="blog-multi-option__checkbox" type="checkbox" name="tag[]" value="<%= item.id %>" id="tag<%= item.id %>" <%= selectedTag.includes(String(item.id)) ? 'checked' : '' %>>
+                                                    <span class="blog-multi-option__label"><%= item.nama_tag %></span>
+                                                </label>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <p class="text-muted mb-0">Belum ada tag</p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="mb-0">Sumber</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="tambahSumber">Tambah Sumber</button>
+                                </div>
+                                <div id="sumberContainer" class="blog-sumber-list mt-2">
+                                    <% sumberList.forEach(function(sumberValue, index) { %>
+                                        <div class="blog-sumber-chip">
+                                            <input type="text" class="form-control" name="sumber[]" placeholder="Masukkan sumber" value="<%= sumberValue %>">
+                                            <button type="button" class="btn btn-icon btn-outline-danger btn-hapus-sumber <%= sumberList.length === 1 ? 'btn-hapus-sumber--hidden' : '' %>">
+                                                <i class="mdi mdi-close"></i>
+                                            </button>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-start mt-4 mb-2">
+                                <button type="submit" class="btn btn-primary mr-2">Ubah</button>
+                                <a href="/pustakawan/blog-proses/<%= blog.id %>" class="btn btn-light" data-loading>Kembali</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<%- include('../../../partials/scripts/__script-dashboard.ejs') %>

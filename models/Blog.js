@@ -73,7 +73,7 @@ class Blog {
         }
     }
 
-    static async generateTautan(judul) {
+    static async generateTautan(judul, excludeId = null) {
         try {
             let baseTautan = judul
                 .toLowerCase()
@@ -86,10 +86,15 @@ class Blog {
             let counter = 1
 
             while (true) {
-                const [rows] = await connection.query(
-                    'SELECT id FROM blog WHERE tautan = ?',
-                    [tautan]
-                )
+                let query = 'SELECT id FROM blog WHERE tautan = ?'
+                let params = [tautan]
+                
+                if (excludeId) {
+                    query += ' AND id != ?'
+                    params.push(excludeId)
+                }
+
+                const [rows] = await connection.query(query, params)
 
                 if (rows.length === 0) {
                     break
@@ -225,6 +230,95 @@ class Blog {
             blog.sumber = sumberRows.map(s => s.nama_sumber)
 
             return blog
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async getByIdForEdit(id, idPegawai, status) {
+        try {
+            const [blogRows] = await connection.query(
+                'SELECT * FROM blog WHERE id = ? AND id_pegawai = ? AND status = ?',
+                [id, idPegawai, status]
+            )
+            
+            if (blogRows.length === 0) {
+                return null
+            }
+
+            const blog = blogRows[0]
+            blog.foto_cover = Blog.normalizeImagePath(blog.foto_cover)
+
+            const [kategoriRows] = await connection.query(
+                `SELECT k.id, k.nama_kategori 
+                 FROM kategori k 
+                 INNER JOIN kategori_blog kb ON k.id = kb.id_kategori 
+                 WHERE kb.id_blog = ?`,
+                [id]
+            )
+
+            const [tagRows] = await connection.query(
+                `SELECT t.id, t.nama_tag 
+                 FROM tag t 
+                 INNER JOIN tag_blog tb ON t.id = tb.id_tag 
+                 WHERE tb.id_blog = ?`,
+                [id]
+            )
+
+            const [sumberRows] = await connection.query(
+                'SELECT nama_sumber FROM sumber WHERE id_blog = ?',
+                [id]
+            )
+
+            blog.kategori = kategoriRows
+            blog.tag = tagRows
+            blog.sumber = sumberRows.map(s => s.nama_sumber)
+
+            return blog
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async deleteTagBlog(idBlog) {
+        try {
+            await connection.query(
+                'DELETE FROM tag_blog WHERE id_blog = ?',
+                [idBlog]
+            )
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async deleteKategoriBlog(idBlog) {
+        try {
+            await connection.query(
+                'DELETE FROM kategori_blog WHERE id_blog = ?',
+                [idBlog]
+            )
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async deleteSumber(idBlog) {
+        try {
+            await connection.query(
+                'DELETE FROM sumber WHERE id_blog = ?',
+                [idBlog]
+            )
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async update(id, data) {
+        try {
+            await connection.query(
+                'UPDATE blog SET ? WHERE id = ?',
+                [data, id]
+            )
         } catch (err) {
             throw err
         }

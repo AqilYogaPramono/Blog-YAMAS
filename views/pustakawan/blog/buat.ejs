@@ -38,8 +38,11 @@
                                 <label for="foto_cover">Foto Cover <span class="text-danger">*</span></label>
                                 <input type="file" class="form-control-file" id="foto_cover" name="foto_cover" accept="image/jpeg,image/jpg,image/png,image/webp" data-preview="previewFotoCover" required>
                                 <small class="form-text text-muted">Format yang diizinkan: JPG, JPEG, PNG, WEBP</small>
-                                <div class="mt-2">
-                                    <img id="previewFotoCover" src="#" alt="preview" style="height:300px;border-radius:8px;display:none;cursor:zoom-in;" class="img-click-preview">
+                                <div id="previewFotoCoverContainer" class="blog-detail-cover mt-3" style="display:none;">
+                                    <div class="blog-cover-header">
+                                        <span class="blog-cover-label"><i class="mdi mdi-image"></i> Preview Foto Cover</span>
+                                    </div>
+                                    <img id="previewFotoCover" src="" alt="Preview foto cover" class="blog-cover-image">
                                 </div>
                             </div>
 
@@ -51,7 +54,7 @@
                             <div class="form-group">
                                 <label>Isi <span class="text-danger">*</span></label>
                                 <div id="editor" style="min-height: 400px;"></div>
-                                <textarea id="initialIsi" class="d-none"><%- formData.isi || '' %></textarea>
+                                <textarea id="initialIsi" class="d-none"><%- formData.isi%></textarea>
                                 <input type="hidden" id="isi" name="isi" required>
                             </div>
 
@@ -126,20 +129,5 @@
     </div>
 </div>
 
-<div class="modal fade modal-below-navbar modal-top" id="globalImagePreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Pratinjau Gambar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body p-0">
-                <img id="globalImagePreviewEl" src="" alt="preview" style="width:100%;height:auto;display:block;">
-            </div>
-        </div>
-    </div>
-</div>
 
 <%- include('../../partials/scripts/__script-dashboard.ejs') %>

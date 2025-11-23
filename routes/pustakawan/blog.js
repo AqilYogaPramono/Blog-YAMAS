@@ -211,7 +211,7 @@ router.post('/create', authPustakawan, upload.single('foto_cover'), async (req, 
         }
 
         req.flash('success', 'Blog berhasil dibuat')
-        return res.redirect('/pustakawan/blog')
+        return res.redirect('/pustakawan/blog-proses')
     } catch (err) {
         console.error(err)
         if (req.file) {

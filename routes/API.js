@@ -31,6 +31,7 @@ router.get('/blog/:tautan', async (req, res) => {
                 id: blog.id,
                 tautan: blog.tautan,
                 judul: blog.judul,
+                ringkasan: blog.ringkasan,
                 foto_cover: blog.foto_cover,
                 nama_pembuat: blog.nama_pembuat,
                 isi: blog.isi,

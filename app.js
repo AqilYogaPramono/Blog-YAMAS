@@ -6,6 +6,9 @@ const logger = require('morgan')
 require('dotenv').config()
 const session = require('express-session')
 const flash = require('express-flash')
+const cors = require('cors')
+
+const { onlyDomain } = require('./middlewares/cors-option')
 
 const indexRouter = require('./routes/index')
 const authRouter = require('./routes/auth')
@@ -51,6 +54,7 @@ app.use(session({
 }))
 
 app.use(flash())
+app.use(cors())
 
 app.use('/', indexRouter)
 app.use('/', authRouter)

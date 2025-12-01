@@ -1,7 +1,3 @@
-/* ============================================
-   Quill Editor - Simple Initialization
-   Fallback sederhana untuk inisialisasi Quill
-   ============================================ */
 (function() {
     'use strict';
     
@@ -9,42 +5,42 @@
     const editorEl = document.querySelector("#editor");
     const initialIsiEl = document.querySelector("#initialIsi");
 
-        // Skip jika sudah diinisialisasi oleh blog editor atau tidak ada element
     if (!editorEl || !initialIsiEl) return;
 
-        // Check apakah form blog ada - jika ada, biarkan blog editor yang handle
         var form = document.getElementById('formBlog');
         if (form) {
-            // Form blog ada, tunggu blog editor yang akan inisialisasi
-            // Jangan jalankan simple init untuk halaman blog
             return;
         }
         
-        // Check multiple ways untuk memastikan tidak double init
         if (editorEl.classList.contains('ql-container') || 
             editorEl.querySelector('.ql-toolbar') || 
             editorEl.dataset.quillInitialized === 'true' ||
             editorEl.dataset.quillInitialized === 'initializing') {
-            return; // Sudah diinisialisasi oleh blog editor
+            return;
         }
 
-        // Pastikan Quill sudah dimuat
         if (typeof Quill === 'undefined') {
-            // Retry setelah 100ms jika Quill belum dimuat
             setTimeout(initSimpleQuill, 100);
             return;
         }
 
         try {
-            // Mark as initializing
             editorEl.dataset.quillInitialized = 'initializing';
             
-            // Gunakan toolbar lengkap sesuai dokumentasi Quill
-            // Format: Array of arrays, setiap array adalah satu baris toolbar
+            try {
+                var SizeStyle = Quill.import('attributors/style/size');
+                if (SizeStyle) {
+                    SizeStyle.whitelist = ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
+                    Quill.register(SizeStyle, true);
+                }
+            } catch (e) {
+                console.error('[Quill] Error registering SizeStyle:', e);
+            }
+
             var toolbarOptions = [
                 [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
                 [{ 'font': [] }],
-                [{ 'size': ['small', false, 'large', 'huge'] }],
+                [{ 'size': ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'] }],
                 ['bold', 'italic', 'underline', 'strike'],
                 [{ 'color': [] }, { 'background': [] }],
                 [{ 'script': 'sub'}, { 'script': 'super' }],
@@ -73,26 +69,12 @@
                                     var file = input.files && input.files[0];
                                     if (!file) return;
                                     
-                                    var formData = new FormData();
-                                    formData.append('gambar', file);
-                                    
-                                    fetch('/pustakawan/blog/upload-gambar', {
-                                        method: 'POST',
-                                        body: formData
-                                    })
-                                    .then(function(res) { return res.json(); })
-                                    .then(function(data) {
-                                        if (data.url) {
+                                    var reader = new FileReader();
+                                    reader.onload = function(e) {
                                             var range = quill.getSelection(true);
-                                            quill.insertEmbed(range.index, 'image', data.url);
-                                        } else {
-                                            alert('Gagal mengupload gambar');
-                                        }
-                                    })
-                                    .catch(function(err) {
-                                        console.error('[Quill] Upload error:', err);
-                                        alert('Gagal mengupload gambar');
-                                    });
+                                        quill.insertEmbed(range.index, 'image', e.target.result);
+                                    };
+                                    reader.readAsDataURL(file);
                                 };
                             }
                         }
@@ -104,35 +86,33 @@
                 placeholder: 'Tulis isi blog di sini...'
             });
 
-            // Load initial content dari textarea
             var initialContent = initialIsiEl.value || initialIsiEl.textContent || '';
             if (initialContent && initialContent.trim() !== '') {
                 quill.root.innerHTML = initialContent;
-                quill.history.clear(); // Clear history setelah load
+                quill.history.clear();
+            } else {
+                quill.root.innerHTML = '<p style="font-size: 12px;"><br></p>';
+                quill.history.clear();
             }
 
-            // Update hidden input on change
-    quill.on("text-change", () => {
+            quill.on("text-change", function() {
                 const isiInput = document.getElementById("isi");
                 if (isiInput) {
                     isiInput.value = quill.root.innerHTML;
                 }
             });
             
-            // Set initial value ke hidden input
             const isiInput = document.getElementById("isi");
             if (isiInput) {
                 isiInput.value = quill.root.innerHTML;
             }
             
-            // Form validation
-            const form = document.getElementById('formBlog');
+            var form = document.getElementById('formBlog');
             if (form) {
                 form.addEventListener('submit', function(e) {
                     var content = quill.root.innerHTML;
                     if (!content || content.trim() === '' || content.trim() === '<p><br></p>') {
                         e.preventDefault();
-                        alert('Isi blog tidak boleh kosong');
                         return false;
                     }
                     if (isiInput) {
@@ -141,7 +121,6 @@
                 });
             }
             
-            // Mark as initialized
             editorEl.dataset.quillInitialized = 'true';
         } catch (error) {
             console.error('[Quill] Error initializing editor:', error);
@@ -149,15 +128,11 @@
         }
     }
     
-    // Initialize saat DOM ready atau jika sudah ready
-    // Delay sedikit untuk memastikan blog editor dijalankan terlebih dahulu
     if (document.readyState === 'loading') {
         document.addEventListener("DOMContentLoaded", function() {
-            // Delay 50ms untuk memastikan blog editor dijalankan terlebih dahulu
             setTimeout(initSimpleQuill, 50);
         });
     } else {
-        // DOM sudah ready, delay sedikit untuk memastikan blog editor dijalankan terlebih dahulu
         setTimeout(initSimpleQuill, 50);
     }
 })();
@@ -263,12 +238,6 @@
     });
 })();
 
-/* ============================================
-   Image Preview Popup - DIHAPUS
-   Preview gambar sekarang menggunakan full screen
-   seperti di halaman detail blog
-   ============================================ */
-
 (function() {
     function setupPasswordToggle() {
         $(document).on('click', '.password-toggle-btn', function() {
@@ -326,16 +295,10 @@
     }
 })();
 
-/* ============================================
-   Image Preview Handler - Full Screen Style
-   Menampilkan preview gambar dengan style
-   full screen seperti di halaman detail
-   ============================================ */
 (function() {
     'use strict';
     
     function setupImagePreview() {
-        // Handle file input change untuk preview gambar
         $(document).on('change', 'input[type="file"][accept*="image"][data-preview]', function(e) {
             const files = e.target.files;
             const previewId = this.getAttribute('data-preview') || 'previewTambah';
@@ -343,7 +306,6 @@
             const previewContainer = document.getElementById(previewId + 'Container');
             
             if (files.length > 0 && files.length === 1 && !this.hasAttribute('multiple')) {
-                // Single image preview dengan style full screen
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         if (preview) {
@@ -355,14 +317,12 @@
                 };
                 reader.readAsDataURL(files[0]);
             } else {
-                // Hide preview jika tidak ada file
                 if (previewContainer) {
                     previewContainer.style.display = 'none';
                 }
             }
         });
 
-        // Initialize preview untuk file yang sudah ada (edit mode)
         document.querySelectorAll('input[type="file"][accept*="image"][data-preview]').forEach(function(input) {
             const previewId = input.getAttribute('data-preview');
             const preview = document.getElementById(previewId);
@@ -379,7 +339,6 @@
         });
     }
 
-    // Initialize on page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupImagePreview);
     } else {
@@ -387,49 +346,9 @@
     }
 })();
 
-/* ============================================
-   Blog Quill Editor - Native Implementation
-   Khusus untuk halaman blog buat/edit
-   
-   PENJELASAN CARA KERJA QUILL:
-   ============================================
-   
-   1. QUICK OVERVIEW:
-      Quill adalah rich text editor yang menggunakan Delta format
-      untuk menyimpan perubahan. Delta adalah format JSON yang
-      merepresentasikan perubahan pada dokumen.
-   
-   2. INISIALISASI:
-      - waitForQuill(): Menunggu library Quill dimuat dari CDN
-      - initBlogQuillEditor(): Menginisialisasi editor dengan konfigurasi
-   
-   3. CUSTOM CLIPBOARD:
-      - CustomClipboard: Override modul clipboard default Quill
-      - onPaste(): Menangani paste gambar dari clipboard
-      - Upload gambar ke server saat paste, lalu insert URL ke editor
-   
-   4. TOOLBAR & MODULES:
-      - Toolbar: Konfigurasi tombol formatting (bold, italic, dll)
-      - Handlers: Custom handler untuk upload gambar via toolbar
-      - Clipboard: Konfigurasi untuk paste behavior
-   
-   5. CONTENT SYNC:
-      - Event 'text-change': Update hidden input setiap ada perubahan
-      - Hidden input (#isi): Menyimpan HTML content untuk form submission
-   
-   6. VALIDATION:
-      - Form submit: Validasi content tidak kosong sebelum submit
-      - Check: Content tidak boleh kosong atau hanya <p><br></p>
-   
-   7. INITIAL CONTENT:
-      - Load dari #initialIsi: Mengisi editor dengan content existing
-      - quill.history.clear(): Clear undo/redo history setelah load
-   
-   ============================================ */
 (function() {
     'use strict';
     
-    // Setup Sumber Inputs
     function setupSumberInputs() {
         var container = document.getElementById('sumberContainer');
         var addBtn = document.getElementById('tambahSumber');
@@ -472,35 +391,63 @@
         updateDeleteButtons();
     }
 
-    /**
-     * Wait for Quill Library
-     * Menunggu library Quill dimuat dari CDN sebelum inisialisasi
-     * 
-     * @param {Function} callback - Function yang akan dipanggil saat Quill ready
-     * @param {Number} maxAttempts - Maksimal percobaan (default: 50 = 5 detik)
-     */
+    function registerCustomSize() {
+        if (typeof Quill === 'undefined') {
+            return false;
+        }
+        try {
+            var SizeStyle = Quill.import('attributors/style/size');
+            if (SizeStyle) {
+                SizeStyle.whitelist = ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'];
+                Quill.register(SizeStyle, true);
+                return true;
+            }
+        } catch (e) {
+            console.error('[Quill] Error registering SizeStyle:', e);
+        }
+        return false;
+    }
+
     function waitForQuill(callback, maxAttempts) {
         var attempts = maxAttempts || 0;
         
-        // Jika Quill sudah dimuat, langsung eksekusi callback
         if (typeof Quill !== 'undefined') {
+            registerCustomSize();
             callback();
             return;
         }
         
-        // Jika sudah mencapai maksimal percobaan, tampilkan error
         if (attempts >= 50) {
             console.error('[Quill] Library tidak ditemukan setelah 5 detik. Pastikan CDN dimuat.');
             return;
         }
         
-        // Retry setiap 100ms
         setTimeout(function() {
             waitForQuill(callback, attempts + 1);
         }, 100);
     }
 
-    // Initialize Quill Editor
+    function dataURLtoFile(dataurl) {
+        try {
+            var arr = dataurl.split(',');
+            var mime = arr[0].match(/:(.*?);/)[1];
+            var bstr = atob(arr[1]);
+            var n = bstr.length;
+            var u8arr = new Uint8Array(n);
+            
+            while(n--){
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            
+            var filename = 'image-' + Date.now() + '.' + (mime.split('/')[1] || 'png');
+            return new File([u8arr], filename, {type: mime});
+        } catch (err) {
+            console.error('[Quill] Error converting data URL:', err);
+            return null;
+        }
+    }
+
+
     function initBlogQuillEditor() {
         var editorEl = document.getElementById('editor');
         var isiInput = document.getElementById('isi');
@@ -510,45 +457,24 @@
             return;
         }
         
-        // Skip if already initialized (check multiple ways)
         if (editorEl.classList.contains('ql-container') || 
             editorEl.querySelector('.ql-toolbar') || 
             editorEl.dataset.quillInitialized === 'true') {
             return;
         }
         
-        // Mark as initializing to prevent double init
         editorEl.dataset.quillInitialized = 'initializing';
 
         waitForQuill(function() {
             try {
-                /**
-                 * INISIALISASI QUILL EDITOR
-                 * 
-                 * KONFIGURASI MODULES:
-                 * - toolbar: Konfigurasi tombol formatting
-                 * - clipboard: Konfigurasi paste behavior (default)
-                 * 
-                 * TOOLBAR CONTAINER:
-                 * Array yang mendefinisikan tombol-tombol di toolbar
-                 * - Header: Dropdown untuk heading (H1-H6)
-                 * - Font: Dropdown untuk font family
-                 * - Size: Dropdown untuk ukuran font
-                 * - Formatting: Bold, italic, underline, strikethrough
-                 * - Color: Text color dan background color
-                 * - Script: Subscript dan superscript
-                 * - List: Ordered dan bullet list
-                 * - Indent: Increase/decrease indent
-                 * - Direction: RTL support
-                 * - Align: Text alignment
-                 * - Media: Link, image, video, formula
-                 * - Clean: Remove formatting
-                 */
-                // Toolbar options sesuai dokumentasi Quill
+                if (typeof Quill === 'undefined') {
+                    return;
+                }
+
                 var toolbarOptions = [
                     [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
                     [{ 'font': [] }],
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    [{ 'size': ['8px', '10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '48px'] }],
                     ['bold', 'italic', 'underline', 'strike'],
                     [{ 'color': [] }, { 'background': [] }],
                     [{ 'script': 'sub'}, { 'script': 'super' }],
@@ -561,23 +487,11 @@
                     ['clean']
                 ];
                 
-                // Inisialisasi Quill dengan toolbar lengkap
-                // Menggunakan clipboard default untuk stabilitas
                 var quill = new Quill('#editor', {
-                    theme: 'snow', // Theme visual Quill
+                    theme: 'snow',
                     modules: {
                         toolbar: {
                             container: toolbarOptions,
-                            /**
-                             * CUSTOM HANDLERS
-                             * Handler khusus untuk tombol tertentu
-                             * 
-                             * image handler:
-                             * - Membuat input file tersembunyi
-                             * - Trigger click untuk membuka file picker
-                             * - Upload file ke server saat dipilih
-                             * - Insert URL gambar ke editor
-                             */
                             handlers: {
                                 image: function() {
                                     var input = document.createElement('input');
@@ -589,71 +503,97 @@
                                         var file = input.files && input.files[0];
                                         if (!file) return;
                                         
-                                        var formData = new FormData();
-                                        formData.append('gambar', file);
-                                        
-                                        fetch('/pustakawan/blog/upload-gambar', {
-                                            method: 'POST',
-                                            body: formData
-                                        })
-                                        .then(function(res) { return res.json(); })
-                                        .then(function(data) {
-                                            if (data && data.url) {
-                                                // Insert gambar di posisi cursor
+                                        var reader = new FileReader();
+                                        reader.onload = function(e) {
                                                 var range = quill.getSelection(true);
                                                 if (range) {
-                                                quill.insertEmbed(range.index, 'image', data.url);
-                                                }
-                                            } else {
-                                                alert('Gagal mengupload gambar');
+                                                quill.insertEmbed(range.index, 'image', e.target.result);
                                             }
-                                        })
-                                        .catch(function(err) {
-                                            console.error('[Quill] Upload error:', err);
-                                            alert('Gagal mengupload gambar');
-                                        });
+                                        };
+                                        reader.readAsDataURL(file);
                                     };
                                 }
                             }
                         },
                         clipboard: {
-                            matchVisual: false // Tidak match visual formatting saat paste
+                            matchVisual: false
                         }
                     },
                     placeholder: 'Tulis isi blog di sini...'
                 });
 
-                /**
-                 * CONTENT SYNC - Event Listener
-                 * 
-                 * text-change event:
-                 * - Triggered setiap kali ada perubahan di editor
-                 * - Update hidden input (#isi) dengan HTML content
-                 * - Hidden input digunakan untuk form submission
-                 */
-                quill.on('text-change', function() {
-                    isiInput.value = quill.root.innerHTML;
+                quill.root.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    var files = e.dataTransfer.files;
+                    if (!files || files.length === 0) return;
+                    
+                    for (var i = 0; i < files.length; i++) {
+                        var file = files[i];
+                        if (file.type.indexOf('image') === -1) continue;
+                        
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                        var range = quill.getSelection(true);
+                            if (range) {
+                                quill.insertEmbed(range.index, 'image', e.target.result);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                quill.root.addEventListener('dragover', function(e) {
+                    e.preventDefault();
                 });
 
-                /**
-                 * LOAD INITIAL CONTENT
-                 * 
-                 * Proses:
-                 * 1. Ambil content dari #initialIsi (textarea tersembunyi)
-                 * 2. Set content ke editor menggunakan innerHTML
-                 * 3. Clear history untuk mencegah undo ke state kosong
-                 * 4. Update hidden input dengan content yang dimuat
-                 * 
-                 * Penting untuk edit mode: Content dari formData.isi || blog.isi
-                 * akan dimuat ke editor saat halaman dibuka
-                 */
+                quill.root.addEventListener('paste', function(e) {
+                    var clipboardData = e.clipboardData || window.clipboardData;
+                    if (!clipboardData) return;
+                    
+                    var items = clipboardData.items;
+                    if (!items) return;
+                    
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') !== -1) {
+                            e.preventDefault();
+                            
+                            var file = items[i].getAsFile();
+                            if (!file) return;
+                            
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                            var range = quill.getSelection(true);
+                                if (range) {
+                                    quill.insertEmbed(range.index, 'image', e.target.result);
+                                    quill.setSelection(range.index + 1);
+                                }
+                            };
+                            reader.readAsDataURL(file);
+                            
+                            return;
+                        }
+                    }
+                });
+
+                quill.on('text-change', function(delta, oldDelta, source) {
+                    isiInput.value = quill.root.innerHTML;
+                    
+                    if (source === 'user') {
+                        var selection = quill.getSelection(true);
+                        if (selection) {
+                            var format = quill.getFormat(selection);
+                            if (!format.size && selection.length === 0) {
+                                quill.format('size', '12px', 'user');
+                            }
+                        }
+                    }
+                });
+
                 var initialNode = document.getElementById('initialIsi');
                 var initialContent = '';
                 
                 if (initialNode) {
-                    // Ambil content dari value atau textContent
                     initialContent = initialNode.value || initialNode.textContent || '';
-                    // Decode HTML entities jika ada
                 if (initialContent) {
                         var tempDiv = document.createElement('div');
                         tempDiv.innerHTML = initialContent;
@@ -661,40 +601,55 @@
                     }
                 }
                 
-                // Load content ke editor jika ada
                 if (initialContent && initialContent.trim() !== '') {
                     quill.root.innerHTML = initialContent;
-                    quill.history.clear(); // Clear undo/redo history
+                    quill.history.clear();
                     isiInput.value = initialContent;
                 } else {
-                    // Set default empty state
-                    quill.root.innerHTML = '';
-                    isiInput.value = '';
+                    quill.root.innerHTML = '<p style="font-size: 12px;"><br></p>';
+                    quill.history.clear();
+                    isiInput.value = '<p style="font-size: 12px;"><br></p>';
                 }
 
-                /**
-                 * FORM VALIDATION
-                 * 
-                 * Validasi sebelum form submit:
-                 * - Check apakah content tidak kosong
-                 * - Check apakah content bukan hanya <p><br></p> (default empty)
-                 * - Prevent submit jika content kosong
-                 * - Update hidden input dengan content terakhir sebelum submit
-                 */
+                quill.on('selection-change', function(range) {
+                    if (range && range.length === 0) {
+                        var format = quill.getFormat(range);
+                        if (!format.size) {
+                            setTimeout(function() {
+                                quill.format('size', '12px', 'user');
+                            }, 0);
+                        }
+                    }
+                });
+
                 form.addEventListener('submit', function(e) {
                     var content = quill.root.innerHTML;
                     if (!content || content.trim() === '' || content.trim() === '<p><br></p>') {
                         e.preventDefault();
-                        alert('Isi blog tidak boleh kosong');
                         return false;
                     }
-                    // Pastikan hidden input ter-update dengan content terakhir
+                    
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content;
+                    var images = tempDiv.querySelectorAll('img[src^="data:"]');
+                    
+                    if (images.length > 0) {
+                        var base64Images = [];
+                        Array.from(images).forEach(function(img) {
+                            base64Images.push(img.src);
+                        });
+                        
+                        var base64Input = document.createElement('input');
+                        base64Input.type = 'hidden';
+                        base64Input.name = 'base64_images';
+                        base64Input.value = JSON.stringify(base64Images);
+                        form.appendChild(base64Input);
+                    }
+                    
                     isiInput.value = content;
                 });
 
-                // Mark as initialized
                 editorEl.dataset.quillInitialized = 'true';
-                console.log('[Quill] Blog editor berhasil diinisialisasi');
             } catch (error) {
                 console.error('[Quill] Error:', error);
                 editorEl.dataset.quillInitialized = 'false';
@@ -702,45 +657,21 @@
         });
     }
 
-    /**
-     * INITIALIZE BLOG PAGE
-     * Fungsi utama untuk inisialisasi halaman blog
-     * 
-     * Proses:
-     * 1. Check apakah form blog ada di halaman
-     * 2. Setup sumber inputs (dynamic input fields)
-     * 3. Initialize Quill editor dengan toolbar lengkap
-     */
     function initBlogPage() {
         var form = document.getElementById('formBlog');
-        if (!form) return; // Exit jika bukan halaman blog
+        if (!form) return;
         
         setupSumberInputs();
         initBlogQuillEditor();
     }
 
-    /**
-     * PAGE LOAD HANDLER
-     * Menunggu DOM ready sebelum inisialisasi
-     * 
-     * Prioritas:
-     * 1. Blog editor lengkap dijalankan terlebih dahulu
-     * 2. Simple initialization sebagai fallback jika blog editor tidak terdeteksi
-     * 
-     * Best Practice:
-     * - Check readyState untuk handle kasus DOM sudah ready
-     * - Gunakan DOMContentLoaded untuk kasus DOM belum ready
-     */
     function initAll() {
-        // Blog editor dijalankan terlebih dahulu
         initBlogPage();
     }
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAll);
     } else {
-        // DOM sudah ready, langsung eksekusi blog editor
-        // Gunakan setTimeout untuk memastikan semua script sudah dimuat
         setTimeout(initAll, 0);
     }
 })();

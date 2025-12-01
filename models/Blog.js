@@ -316,7 +316,7 @@ class Blog {
     static async update(id, data) {
         try {
             await connection.query(
-                'UPDATE blog SET ? WHERE id = ?',
+                'UPDATE blog SET ?, status = "Proses" WHERE id = ?',
                 [data, id]
             )
         } catch (err) {

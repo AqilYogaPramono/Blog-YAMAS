@@ -1047,6 +1047,11 @@ nav .pagination li.page-item:not(.disabled):focus-within > a.page-link {
     padding: 20px !important;
     line-height: 1.6 !important;
     color: #1f2937 !important;
+    font-size: 12px !important;
+}
+
+#editor .ql-editor p {
+    font-size: 12px;
 }
 
 #editor .ql-editor.ql-blank::before {
@@ -1075,6 +1080,146 @@ nav .pagination li.page-item:not(.disabled):focus-within > a.page-link {
 #editor .ql-toolbar button:hover .ql-fill,
 #editor .ql-toolbar button.ql-active .ql-fill {
     fill: #0F8EC8;
+}
+
+#editor .ql-editor .ql-size-8px {
+    font-size: 8px;
+}
+
+#editor .ql-editor .ql-size-10px {
+    font-size: 10px;
+}
+
+#editor .ql-editor .ql-size-12px {
+    font-size: 12px;
+}
+
+#editor .ql-editor .ql-size-14px {
+    font-size: 14px;
+}
+
+#editor .ql-editor .ql-size-16px {
+    font-size: 16px;
+}
+
+#editor .ql-editor .ql-size-18px {
+    font-size: 18px;
+}
+
+#editor .ql-editor .ql-size-20px {
+    font-size: 20px;
+}
+
+#editor .ql-editor .ql-size-24px {
+    font-size: 24px;
+}
+
+#editor .ql-editor .ql-size-32px {
+    font-size: 32px;
+}
+
+#editor .ql-editor .ql-size-48px {
+    font-size: 48px;
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="8px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="8px"]::before {
+    content: '8px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
+    content: '10px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
+    content: '12px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
+    content: '14px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="16px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
+    content: '16px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="18px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
+    content: '18px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="20px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
+    content: '20px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
+    content: '24px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
+    content: '32px';
+}
+
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value="48px"]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="48px"]::before {
+    content: '48px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="8px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="8px"]::before {
+    content: '8px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="10px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
+    content: '10px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="12px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
+    content: '12px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="14px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
+    content: '14px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="16px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
+    content: '16px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="18px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
+    content: '18px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="20px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
+    content: '20px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="24px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
+    content: '24px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="32px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
+    content: '32px';
+}
+
+#editor .ql-snow .ql-picker.ql-size .ql-picker-label[data-value="48px"]::before,
+#editor .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="48px"]::before {
+    content: '48px';
 }
 
 .blog-quill-editor {
@@ -1633,6 +1778,46 @@ nav .pagination li.page-item:not(.disabled):focus-within > a.page-link {
 
 .blog-content-body .ql-size-normal {
     font-size: 1em;
+}
+
+.blog-content-body .ql-size-8px {
+    font-size: 8px;
+}
+
+.blog-content-body .ql-size-10px {
+    font-size: 10px;
+}
+
+.blog-content-body .ql-size-12px {
+    font-size: 12px;
+}
+
+.blog-content-body .ql-size-14px {
+    font-size: 14px;
+}
+
+.blog-content-body .ql-size-16px {
+    font-size: 16px;
+}
+
+.blog-content-body .ql-size-18px {
+    font-size: 18px;
+}
+
+.blog-content-body .ql-size-20px {
+    font-size: 20px;
+}
+
+.blog-content-body .ql-size-24px {
+    font-size: 24px;
+}
+
+.blog-content-body .ql-size-32px {
+    font-size: 32px;
+}
+
+.blog-content-body .ql-size-48px {
+    font-size: 48px;
 }
 
 .blog-content-body .ql-font-arial,

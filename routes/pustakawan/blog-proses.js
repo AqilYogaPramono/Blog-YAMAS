@@ -143,7 +143,7 @@ router.get('/edit/:id', authPustakawan, async (req, res) => {
 router.post('/update/:id', authPustakawan, upload.single('foto_cover'), async (req, res) => {
     try {
         const {id} = req.params
-        const {judul, ringkasan, nama_pembuat, isi, kategori, tag, sumber} = req.body
+        const {judul, ringkasan, nama_pembuat, isi, kategori, tag, sumber, base64_images} = req.body
         
         const blog = await Blog.getByIdForEdit(id, req.session.pegawaiId, 'Proses')
         if (!blog) {
@@ -154,7 +154,40 @@ router.post('/update/:id', authPustakawan, upload.single('foto_cover'), async (r
             return res.redirect('/pustakawan/blog-proses')
         }
 
-        const rawIsi = typeof isi === 'string' ? isi : ''
+        var processedIsi = typeof isi === 'string' ? isi : ''
+        
+        if (base64_images) {
+            try {
+                const base64Array = JSON.parse(base64_images)
+                for (let i = 0; i < base64Array.length; i++) {
+                    const base64 = base64Array[i]
+                    const matches = base64.match(/^data:image\/(\w+);base64,(.+)$/)
+                    if (matches) {
+                        const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1]
+                        const imageData = matches[2]
+                        const buffer = Buffer.from(imageData, 'base64')
+                        const filename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext
+                        const filePath = path.join(__dirname, '../../public/images/blog', filename)
+                        
+                        fs.writeFileSync(filePath, buffer)
+                        const result = await convertImageFile(filePath)
+                        
+                        if (result) {
+                            const relativePath = '/images/blog/' + path.basename(result.outputPath)
+                            processedIsi = processedIsi.replace(base64, relativePath)
+                        } else {
+                            if (fs.existsSync(filePath)) {
+                                fs.unlinkSync(filePath)
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Error processing base64 images:', err)
+            }
+        }
+
+        const rawIsi = processedIsi
         const payload = {
             judul: (judul || '').trim(),
             ringkasan: (ringkasan || '').trim(),

@@ -5,7 +5,6 @@ const Pegawai = require('../models/Pegawai')
 
 const router = express.Router()
 
-// Login Pustakawan - GET
 router.get('/masuk-pustakawan', async (req, res) => {
     try {
         res.render('auths/login-pustakawan', { data: req.flash('data')[0] })
@@ -16,7 +15,6 @@ router.get('/masuk-pustakawan', async (req, res) => {
     }
 })
 
-// Login Manajer - GET
 router.get('/masuk-manajer', async (req, res) => {
     try {
         res.render('auths/login-manajer', { data: req.flash('data')[0] })
@@ -27,7 +25,6 @@ router.get('/masuk-manajer', async (req, res) => {
     }
 })
 
-// Login Pustakawan - POST
 router.post('/log-pustakawan', async (req, res) => {
     try {
         const { nomor_pegawai, kata_sandi } = req.body
@@ -62,8 +59,11 @@ router.post('/log-pustakawan', async (req, res) => {
             return res.redirect('/masuk-pustakawan')
         }
 
-        // Validasi hak akses harus pustakawan
-        if (aplikasiBlog.hak_akses != "pustakawan") {
+        const hasPustakawanAccess = pegawai.aplikasi.some(
+            app => app.nama_aplikasi == 'blog' && app.hak_akses == 'pustakawan'
+        )
+
+        if (!hasPustakawanAccess) {
             req.flash('error', 'Akun Anda tidak memiliki hak akses sebagai Pustakawan')
             req.flash('data', data)
             return res.redirect('/masuk-pustakawan')
@@ -94,7 +94,7 @@ router.post('/log-pustakawan', async (req, res) => {
         }
 
         req.session.pegawaiId = pegawai.id
-        req.session.hak_akses = aplikasiBlog.hak_akses
+        req.session.hak_akses = 'pustakawan'
         req.flash('success', 'Anda berhasil masuk')
         return res.redirect('/pustakawan/dashboard')
     } catch (err) {
@@ -104,7 +104,6 @@ router.post('/log-pustakawan', async (req, res) => {
     }
 })
 
-// Login Manajer - POST
 router.post('/log-manajer', async (req, res) => {
     try {
         const { nomor_pegawai, kata_sandi } = req.body
@@ -139,8 +138,11 @@ router.post('/log-manajer', async (req, res) => {
             return res.redirect('/masuk-manajer')
         }
 
-        // Validasi hak akses harus manajer
-        if (aplikasiBlog.hak_akses != "manajer") {
+        const hasManajerAccess = pegawai.aplikasi.some(
+            app => app.nama_aplikasi == 'blog' && app.hak_akses == 'manajer'
+        )
+
+        if (!hasManajerAccess) {
             req.flash('error', 'Akun Anda tidak memiliki hak akses sebagai Manajer')
             req.flash('data', data)
             return res.redirect('/masuk-manajer')
@@ -171,7 +173,7 @@ router.post('/log-manajer', async (req, res) => {
         }
 
         req.session.pegawaiId = pegawai.id
-        req.session.hak_akses = aplikasiBlog.hak_akses
+        req.session.hak_akses = 'manajer'
         req.flash('success', 'Anda berhasil masuk')
         return res.redirect('/manajer/dashboard')
     } catch (err) {

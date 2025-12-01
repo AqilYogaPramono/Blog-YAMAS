@@ -37,12 +37,12 @@
                             <div class="form-group">
                                 <label for="foto_cover">Foto Cover</label>
                                 <input type="file" class="form-control-file" id="foto_cover" name="foto_cover" accept="image/jpeg,image/jpg,image/png,image/webp" data-preview="previewFotoCover">
-                                <small class="form-text text-muted">Format yang diizinkan: JPG, JPEG, PNG, WEBP. Kosongkan jika tidak ingin mengubah foto cover.</small>
+                                <small class="form-text text-muted">Format yang diizinkan: JPG, JPEG, PNG, WEBP. Foto harus berukuran 16:9. Kosongkan jika tidak ingin mengubah foto cover.</small>
                                 <div id="previewFotoCoverContainer" class="blog-detail-cover mt-3" <%= blog.foto_cover ? '' : 'style="display:none;"' %>>
                                     <div class="blog-cover-header">
-                                        <span class="blog-cover-label"><i class="mdi mdi-image"></i> Preview Foto Cover</span>
+                                        <span class="blog-cover-label"><i class="mdi mdi-image"></i> Pratinjau Foto Cover</span>
                                     </div>
-                                    <img id="previewFotoCover" src="<%= blog.foto_cover || '' %>" alt="Preview foto cover" class="blog-cover-image">
+                                    <img id="previewFotoCover" src="<%= blog.foto_cover || '' %>" alt="Pratinjau foto cover" class="blog-cover-image">
                                 </div>
                             </div>
 

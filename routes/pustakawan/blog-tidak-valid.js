@@ -2,6 +2,7 @@ const express = require('express')
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
+const sharp = require('sharp')
 const { convertImageFile } = require('../../middlewares/convertImage')
 const Blog = require('../../models/Blog')
 const Kategori = require('../../models/Kategori')
@@ -46,6 +47,19 @@ const deleteUploadedFile = (file) => {
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath)
         }
+    }
+}
+
+const isSixteenByNinePhoto = async (filePath, tolerance = 0.02) => {
+    try {
+        const metadata = await sharp(filePath).metadata()
+        if (!metadata.width || !metadata.height) return false
+        const ratio = metadata.width / metadata.height
+        const expected = 16 / 9
+        return Math.abs(ratio - expected) <= tolerance
+    } catch (err) {
+        console.error('Error checking blog cover photo ratio:', err)
+        return false
     }
 }
 
@@ -265,6 +279,16 @@ router.post('/update/:id', authPustakawan, upload.single('foto_cover'), async (r
                 req.flash("error", "Hanya file gambar (jpg, jpeg, png, webp) yang diizinkan")
                 req.flash('data', flashData)
                 return res.redirect(`/pustakawan/blog-tidak-valid/edit/${id}`)
+            }
+
+            if (req.file && req.file.path) {
+                const isValidSize = await isSixteenByNinePhoto(req.file.path)
+                if (!isValidSize) {
+                    deleteUploadedFile(req.file)
+                    req.flash("error", "Foto cover harus berukuran 16:9")
+                    req.flash('data', flashData)
+                    return res.redirect(`/pustakawan/blog-tidak-valid/edit/${id}`)
+                }
             }
 
             const inputPath = req.file.path

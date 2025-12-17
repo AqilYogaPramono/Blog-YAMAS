@@ -508,7 +508,10 @@ class Blog {
                 [idTag, size, start]
             )
 
-            return rows
+            return rows.map((row) => ({
+                ...row,
+                foto_cover: Blog.normalizeImagePath(row.foto_cover)
+            }))
         } catch (err) {
             throw err
         }

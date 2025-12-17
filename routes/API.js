@@ -1,5 +1,7 @@
 const express = require('express')
 const Blog = require('../models/Blog')
+const Kategori = require('../models/Kategori')
+const Tag = require('../models/Tag')
 
 const router = express.Router()
 
@@ -53,9 +55,13 @@ router.get('/tag/:id', async (req, res) => {
         const limit = parseInt(req.query.limit, 10) || 50
         const offset = parseInt(req.query.offset, 10) || 0
 
+        const tag = await Tag.getById(id)
         const data = await Blog.getValidByTagId(id, limit, offset)
 
-        res.json({ data })
+        res.json({ 
+            data,
+            tag: tag ? { id: tag.id, nama_tag: tag.nama_tag } : null
+        })
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: 'Internal Server Error' })
@@ -68,9 +74,13 @@ router.get('/kategori/:id', async (req, res) => {
         const limit = parseInt(req.query.limit, 10) || 50
         const offset = parseInt(req.query.offset, 10) || 0
 
+        const kategori = await Kategori.getById(id)
         const data = await Blog.getValidByKategoriId(id, limit, offset)
 
-        res.json({ data })
+        res.json({ 
+            data,
+            kategori: kategori ? { id: kategori.id, nama_kategori: kategori.nama_kategori } : null
+        })
     } catch (err) {
         console.error(err)
         res.status(500).json({ message: 'Internal Server Error' })

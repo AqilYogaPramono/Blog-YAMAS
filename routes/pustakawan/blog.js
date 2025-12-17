@@ -43,12 +43,27 @@ const storage = multer.diskStorage({
 const upload = multer({storage})
 
 const deleteUploadedFile = (file) => {
-    if (file && file.path) {
-        const filePath = path.join(__dirname, '../../public/images/blog', file.filename)
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath)
+    if (!file || !file.filename) return
+
+    const filePath = path.join(__dirname, '../../public/images/blog', file.filename)
+
+    const attemptDelete = (retries = 3) => {
+        try {
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath)
+            }
+        } catch (err) {
+            if ((err.code === 'EBUSY' || err.code === 'EPERM') && retries > 0) {
+                setTimeout(() => attemptDelete(retries - 1), 200)
+                return
+            }
+            if (err.code !== 'ENOENT') {
+                console.error('Error deleting uploaded file:', err)
+            }
         }
     }
+
+    attemptDelete()
 }
 
 const isSixteenByNinePhoto = async (filePath, tolerance = 0.02) => {

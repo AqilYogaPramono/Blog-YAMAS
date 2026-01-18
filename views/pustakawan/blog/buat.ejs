@@ -26,12 +26,13 @@
                             <div class="form-group">
                                 <label for="judul">Judul <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="judul" name="judul" placeholder="Masukkan judul blog" value="<%= formData.judul || '' %>" required>
-                                <small class="form-text text-muted">Tautan akan dibuat otomatis dari judul</small>
+                                <small class="form-text text-muted">Judul Maksiamal 250 Karakter</small>
                             </div>
 
                             <div class="form-group">
                                 <label for="ringkasan">Ringkasan <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="ringkasan" name="ringkasan" rows="3" placeholder="Masukkan ringkasan blog" required><%= formData.ringkasan || '' %></textarea>
+                                <small class="form-text text-muted">Ringkasan Maksiamal 250 Karakter</small>
                             </div>
 
                             <div class="form-group">
@@ -113,6 +114,7 @@
                                                 <i class="mdi mdi-close"></i>
                                             </button>
                                         </div>
+                                        <small class="form-text text-muted">Sumber Maksiamal 250 karakter</small>
                                     <% }) %>
                                 </div>
                             </div>

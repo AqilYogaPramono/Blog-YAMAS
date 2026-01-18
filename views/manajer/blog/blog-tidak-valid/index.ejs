@@ -12,6 +12,20 @@
                             <h4 class="card-title mb-3 mb-md-0">Blog Tidak Valid</h4>
                         </div>
 
+                        <form action="/manajer/blog-tidak-valid/search" method="POST" class="pengumuman-search-form" data-loading>
+                            <div class="pengumuman-search">
+                                <div class="search-input-wrapper">
+                                    <input type="text" class="form-control" name="judul" placeholder="Cari judul blog proses..." value="<%= (typeof keyword !== 'undefined' && keyword) ? keyword : '' %>">
+                                    <a href="/manajer/blog-tidak-valid" class="search-clear-btn" data-loading aria-label="Bersihkan pencarian">
+                                        <span aria-hidden="true">&times;</span>
+                                    </a>
+                                </div>
+                                <div class="search-actions">
+                                    <button class="btn btn-primary search-submit" type="submit">Cari</button>
+                                </div>
+                            </div>
+                        </form>
+                        
                         <div class="table-responsive">
                             <table class="table table-hover table-stacked">
                                 <thead>
@@ -29,8 +43,8 @@
                                         <% for (let i = 0; i < data.length; i++) { const item = data[i]; %>
                                             <tr>
                                                 <td data-label="No"><%= (page - 1) * 20 + i + 1 %></td>
-                                                <td data-label="Judul"><%= item.judul %></td>
-                                                <td data-label="Nama Pembuat"><%= item.nama_pembuat %></td>
+                                                <td data-label="Judul"><%= item.judul ? (item.judul.length > 35 ? item.judul.substring(0, 35) + '...' : item.judul) : '-'%></td>
+                                                <td data-label="Nama Pembuat"><%= item.nama_pembuat ? (item.nama_pembuat.length > 15 ? item.nama_pembuat.substring(0, 15) + '...' : item.nama_pembuat) : '-'%></td>
                                                 <td data-label="Dibuat Pada"><%= item.dibuat_pada_display %></td>
                                                 <td data-label="Diverifikasi Oleh"><%= item.diverifikasi_oleh_display %></td>
                                                 <td class="text-right" data-label="Aksi">

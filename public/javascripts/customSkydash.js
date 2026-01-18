@@ -675,3 +675,31 @@
         setTimeout(initAll, 0);
     }
 })();
+
+document.addEventListener('DOMContentLoaded', function() {
+    $('#updateStatusModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const status = button.data('status');
+        const modal = $(this);
+        const modalContent = modal.find('#updateStatusModalContent');
+        const modalHeader = modal.find('#updateStatusModalHeader');
+        
+        modal.find('#statusInput').val(status);
+        
+        // Remove previous status classes
+        modalContent.removeClass('blog-status-modal-valid blog-status-modal-invalid');
+        modalHeader.removeClass('blog-status-modal-header-valid blog-status-modal-header-invalid');
+        
+        if (status === 'Valid') {
+            modal.find('#updateStatusModalLabel').text('Setujui Blog');
+            modal.find('#submitBtn').removeClass('btn-danger').addClass('btn-success').html('<i class="mdi mdi-check"></i> Setujui');
+            modalContent.addClass('blog-status-modal-valid');
+            modalHeader.addClass('blog-status-modal-header-valid');
+        } else {
+            modal.find('#updateStatusModalLabel').text('Tolak Blog');
+            modal.find('#submitBtn').removeClass('btn-success').addClass('btn-danger').html('<i class="mdi mdi-close"></i> Tolak');
+            modalContent.addClass('blog-status-modal-invalid');
+            modalHeader.addClass('blog-status-modal-header-invalid');
+        }
+    });
+});

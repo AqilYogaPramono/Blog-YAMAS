@@ -1655,7 +1655,7 @@ nav .pagination li.page-item:not(.disabled):focus-within > a.page-link {
 }
 
 .blog-content-body p {
-    margin-bottom: 1.25rem;
+    margin: 0;
     color: #374151;
 }
 

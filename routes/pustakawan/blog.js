@@ -98,7 +98,6 @@ router.get('/buat', authPustakawan, async (req, res) => {
     }
 })
 
-
 router.post('/create', authPustakawan, upload.single('foto_cover'), async (req, res) => {
     try {
         const {judul, ringkasan, nama_pembuat, isi, kategori, tag, sumber, base64_images} = req.body
@@ -177,6 +176,24 @@ router.post('/create', authPustakawan, upload.single('foto_cover'), async (req, 
         const cleanedIsi = rawIsi.replace(/<(.|\n)*?>/g, '').trim()
         if (!rawIsi || !cleanedIsi) {
             req.flash("error", "Isi blog tidak boleh kosong")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
+        }
+
+        if (payload.judul.length > 250) {
+            req.flash("error", "Judul maksimal 255 karakter")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
+        }
+
+        if (payload.ringkasan.length > 250) {
+            req.flash("error", "Ringkasan maksimal 255 karakter")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
+        }
+
+        if (payload.nama_pembuat.length > 250) {
+            req.flash("error", "Nama pembuat maksimal 255 karakter")
             req.flash('data', flashData)
             return res.redirect('/pustakawan/blog/buat')
         }

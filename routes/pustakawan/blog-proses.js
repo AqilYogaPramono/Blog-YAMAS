@@ -66,12 +66,34 @@ const isSixteenByNinePhoto = async (filePath, tolerance = 0.02) => {
 router.get('/', authPustakawan, async (req, res) => {
     try {
         const pegawai = await Pegawai.getNama(req.session.pegawaiId)
+
+        const flashedKeyword = req.flash('keyword')[0]
         const page = parseInt(req.query.page) || 1
         const limit = 20
         const offset = (page - 1) * limit
 
+        if (flashedKeyword) {
+            const data = await Blog.searchJudulBlog(
+                flashedKeyword,
+                req.session.pegawaiId
+            )
+
+            const totalHalaman = 1
+
+            return res.render('pustakawan/blog/blog-proses/index', {
+                data,
+                pegawai,
+                page: 1,
+                totalHalaman,
+                keyword: flashedKeyword
+            })
+        }
+
+
         const data = await Blog.getByStatusAndPegawai('Proses', req.session.pegawaiId, limit, offset)
-        const totalData = await Blog.countByStatusAndPegawai('Proses', req.session.pegawaiId)
+
+        const totalData = await Blog.countByStatusAndPegawai('Proses',req.session.pegawaiId)
+
         const totalHalaman = Math.ceil(totalData / limit)
 
         res.render('pustakawan/blog/blog-proses/index', {
@@ -86,6 +108,20 @@ router.get('/', authPustakawan, async (req, res) => {
         return res.redirect('/pustakawan/dashboard')
     }
 })
+
+router.post('/search', authPustakawan, async (req, res) => {
+    try {
+        const { judul } = req.body
+
+        req.flash('keyword', judul)
+        return res.redirect('/pustakawan/blog-proses')
+    } catch (err) {
+        console.error(err)
+        req.flash('error', "Internal Server Error")
+        return res.redirect('/pustakawan/dashboard')
+    }
+})
+
 
 router.get('/:id', authPustakawan, async (req, res) => {
     try {
@@ -256,6 +292,24 @@ router.post('/update/:id', authPustakawan, upload.single('foto_cover'), async (r
             req.flash("error", "Isi blog tidak boleh kosong")
             req.flash('data', flashData)
             return res.redirect(`/pustakawan/blog-proses/edit/${id}`)
+        }
+
+        if (payload.judul.length > 250) {
+            req.flash("error", "Judul maksimal 255 karakter")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
+        }
+
+        if (payload.ringkasan.length > 250) {
+            req.flash("error", "Ringkasan maksimal 255 karakter")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
+        }
+
+        if (payload.nama_pembuat.length > 250) {
+            req.flash("error", "Nama pembuat maksimal 255 karakter")
+            req.flash('data', flashData)
+            return res.redirect('/pustakawan/blog/buat')
         }
 
         let fotoCover = blog.foto_cover

@@ -8,26 +8,51 @@ const router = express.Router()
 router.get('/', authManajer, async (req, res) => {
     try {
         const pegawai = await Pegawai.getNama(req.session.pegawaiId)
+
+        const flashedKeyword = req.flash('keyword')[0]
         const page = parseInt(req.query.page) || 1
         const limit = 20
         const offset = (page - 1) * limit
 
-        const rows = await Blog.getByStatus('Tidak-Valid', limit, offset)
         const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-        const data = rows.map((item) => {
-            const dateObj = new Date(item.dibuat_pada)
-            const day = dateObj.getDate()
-            const month = months[dateObj.getMonth()]
-            const year = dateObj.getFullYear()
-            const hours = String(dateObj.getHours()).padStart(2, '0')
-            const minutes = String(dateObj.getMinutes()).padStart(2, '0')
-            const dibuat_pada_display = `${day} ${month} ${year} ${hours}:${minutes}`
-            return {
-                ...item,
-                dibuat_pada_display,
-                diverifikasi_oleh_display: item.diverifikasi_oleh || '-'
-            }
-        })
+
+        const formatData = (rows) => {
+            return rows.map(item => {
+                const dateObj = new Date(item.dibuat_pada)
+                const day = dateObj.getDate()
+                const month = months[dateObj.getMonth()]
+                const year = dateObj.getFullYear()
+                const hours = String(dateObj.getHours()).padStart(2, '0')
+                const minutes = String(dateObj.getMinutes()).padStart(2, '0')
+
+                return {
+                    ...item,
+                    dibuat_pada_display: `${day} ${month} ${year} ${hours}:${minutes}`,
+                    diverifikasi_oleh_display: item.diverifikasi_oleh || '-'
+                }
+            })
+        }
+
+        if (flashedKeyword) {
+            const rows = await Blog.searchJudulBlogByStatusManajer(
+                'Tidak-Valid',
+                flashedKeyword
+            )
+
+            const data = formatData(rows)
+
+            return res.render('manajer/blog/blog-tidak-valid/index', {
+                data,
+                pegawai,
+                page: 1,
+                totalHalaman: 1,
+                keyword: flashedKeyword
+            })
+        }
+
+        const rows = await Blog.getByStatus('Tidak-Valid', limit, offset)
+        const data = formatData(rows)
+
         const totalData = await Blog.countByStatus('Tidak-Valid')
         const totalHalaman = Math.ceil(totalData / limit)
 
@@ -43,6 +68,24 @@ router.get('/', authManajer, async (req, res) => {
         return res.redirect('/manajer/dashboard')
     }
 })
+
+router.post('/search', authManajer, async (req, res) => {
+    try {
+        const { judul } = req.body
+
+        if (!judul || !judul.trim()) {
+            return res.redirect('/manajer/blog-tidak-valid')
+        }
+
+        req.flash('keyword', judul)
+        return res.redirect('/manajer/blog-tidak-valid')
+    } catch (err) {
+        console.error(err)
+        req.flash('error', "Internal Server Error")
+        return res.redirect('/manajer/dashboard')
+    }
+})
+
 
 router.get('/:id', authManajer, async (req, res) => {
     try {

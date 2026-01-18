@@ -109,10 +109,7 @@ class Kategori {
 
     static async checkKategoriUsed(id) {
         try {
-            const [rows] = await connection.query(
-                `SELECT COUNT(id_blog) AS total FROM kategori_blog WHERE id_kategori = ?`,
-                [id]
-            )
+            const [rows] = await connection.query(`SELECT COUNT(id_blog) AS total FROM kategori_blog WHERE id_kategori = ?`,[id])
             return rows[0].total > 0
         } catch (err) {
             throw err

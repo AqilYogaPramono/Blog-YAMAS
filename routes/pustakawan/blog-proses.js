@@ -157,8 +157,6 @@ router.get('/edit/:id', authPustakawan, async (req, res) => {
         const {id} = req.params
         const pegawai = await Pegawai.getNama(req.session.pegawaiId)
         const blog = await Blog.getByIdForEdit(id, req.session.pegawaiId, 'Proses')
-        const kategori = await Kategori.getLatest(10)
-        const tag = await Tag.getLatest(10)
 
         if (!blog) {
             req.flash('error', 'Blog tidak ditemukan')
@@ -176,11 +174,29 @@ router.get('/edit/:id', authPustakawan, async (req, res) => {
             sumber: blog.sumber.length ? blog.sumber : ['']
         }
 
+        const kategoriSelected = normalizeIds(data.kategori || data['kategori[]'])
+        const tagSelected = normalizeIds(data.tag || data['tag[]'])
+
+        const [kategoriLatest, tagLatest, kategoriPicked, tagPicked] = await Promise.all([
+            Kategori.getLatest(5),
+            Tag.getLatest(5),
+            kategoriSelected.length ? Kategori.getByIds(kategoriSelected) : Promise.resolve([]),
+            tagSelected.length ? Tag.getByIds(tagSelected) : Promise.resolve([])
+        ])
+
+        const kategoriMap = new Map()
+        kategoriPicked.forEach((item) => kategoriMap.set(String(item.id), item))
+        kategoriLatest.forEach((item) => kategoriMap.set(String(item.id), item))
+
+        const tagMap = new Map()
+        tagPicked.forEach((item) => tagMap.set(String(item.id), item))
+        tagLatest.forEach((item) => tagMap.set(String(item.id), item))
+
         res.render('pustakawan/blog/blog-proses/edit', {
             blog,
             pegawai,
-            kategori,
-            tag,
+            kategori: Array.from(kategoriMap.values()),
+            tag: Array.from(tagMap.values()),
             data
         })
     } catch (err) {

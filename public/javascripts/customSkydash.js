@@ -209,6 +209,9 @@
     }
 
     $(document).on('submit', 'form[data-loading], form', function() {
+        if (this && this.getAttribute && this.getAttribute('data-loading-skip') === 'true') {
+            return;
+        }
         showLoading();
     });
 
@@ -471,6 +474,35 @@
                     return;
                 }
 
+                function uploadEditorImage(file) {
+                    var formData = new FormData();
+                    formData.append('image', file);
+                    return fetch('/pustakawan/blog/upload-editor-image', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    })
+                        .then(function(resp) {
+                            if (!resp.ok) {
+                                throw new Error('Upload gagal');
+                            }
+                            return resp.json();
+                        })
+                        .then(function(json) {
+                            return json && json.url ? json.url : null;
+                        });
+                }
+
+                function insertImageUrl(url) {
+                    if (!url) return;
+                    var range = quill.getSelection(true);
+                    if (!range) {
+                        range = { index: quill.getLength() };
+                    }
+                    quill.insertEmbed(range.index, 'image', url, 'user');
+                    quill.setSelection(range.index + 1, 0, 'silent');
+                }
+
                 var toolbarOptions = [
                     [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
                     [{ 'font': [] }],
@@ -502,15 +534,9 @@
                                     input.onchange = function() {
                                         var file = input.files && input.files[0];
                                         if (!file) return;
-                                        
-                                        var reader = new FileReader();
-                                        reader.onload = function(e) {
-                                                var range = quill.getSelection(true);
-                                                if (range) {
-                                                quill.insertEmbed(range.index, 'image', e.target.result);
-                                            }
-                                        };
-                                        reader.readAsDataURL(file);
+                                        uploadEditorImage(file)
+                                            .then(function(url) { insertImageUrl(url); })
+                                            .catch(function(err) { console.error('[Quill] Upload image error:', err); });
                                     };
                                 }
                             }
@@ -530,15 +556,11 @@
                     for (var i = 0; i < files.length; i++) {
                         var file = files[i];
                         if (file.type.indexOf('image') === -1) continue;
-                        
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                        var range = quill.getSelection(true);
-                            if (range) {
-                                quill.insertEmbed(range.index, 'image', e.target.result);
-                            }
-                        };
-                        reader.readAsDataURL(file);
+                        (function(f) {
+                            uploadEditorImage(f)
+                                .then(function(url) { insertImageUrl(url); })
+                                .catch(function(err) { console.error('[Quill] Upload image error:', err); });
+                        })(file);
                     }
                 });
                 
@@ -559,16 +581,9 @@
                             
                             var file = items[i].getAsFile();
                             if (!file) return;
-                            
-                            var reader = new FileReader();
-                            reader.onload = function(e) {
-                            var range = quill.getSelection(true);
-                                if (range) {
-                                    quill.insertEmbed(range.index, 'image', e.target.result);
-                                    quill.setSelection(range.index + 1);
-                                }
-                            };
-                            reader.readAsDataURL(file);
+                            uploadEditorImage(file)
+                                .then(function(url) { insertImageUrl(url); })
+                                .catch(function(err) { console.error('[Quill] Upload image error:', err); });
                             
                             return;
                         }
@@ -628,24 +643,6 @@
                         e.preventDefault();
                         return false;
                     }
-                    
-                    var tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content;
-                    var images = tempDiv.querySelectorAll('img[src^="data:"]');
-                    
-                    if (images.length > 0) {
-                        var base64Images = [];
-                        Array.from(images).forEach(function(img) {
-                            base64Images.push(img.src);
-                        });
-                        
-                        var base64Input = document.createElement('input');
-                        base64Input.type = 'hidden';
-                        base64Input.name = 'base64_images';
-                        base64Input.value = JSON.stringify(base64Images);
-                        form.appendChild(base64Input);
-                    }
-                    
                     isiInput.value = content;
                 });
 
@@ -663,6 +660,138 @@
         
         setupSumberInputs();
         initBlogQuillEditor();
+        setupBlogTaxonomySearch(form);
+    }
+
+    function setupBlogTaxonomySearch(form) {
+        function getSelectedIds(name) {
+            var nodes = form.querySelectorAll('input[type="checkbox"][name="' + name + '"]:checked');
+            var ids = [];
+            nodes.forEach(function(node) {
+                if (node && node.value) ids.push(String(node.value));
+            });
+            return Array.from(new Set(ids));
+        }
+
+        function renderOptions(listEl, name, items, selectedIds, labelKey, idPrefix) {
+            if (!listEl) return;
+            listEl.innerHTML = '';
+
+            if (!Array.isArray(items) || items.length === 0) {
+                var empty = document.createElement('p');
+                empty.className = 'text-muted mb-0';
+                empty.textContent = name === 'tag[]' ? 'Belum ada tag' : 'Belum ada kategori';
+                listEl.appendChild(empty);
+                return;
+            }
+
+            items.forEach(function(item) {
+                if (!item || typeof item.id === 'undefined' || item.id === null) return;
+                var idStr = String(item.id);
+                var inputId = idPrefix + idStr;
+
+                var label = document.createElement('label');
+                label.className = 'blog-multi-option blog-multi-option--light';
+                label.setAttribute('for', inputId);
+
+                var input = document.createElement('input');
+                input.className = 'blog-multi-option__checkbox';
+                input.type = 'checkbox';
+                input.name = name;
+                input.value = idStr;
+                input.id = inputId;
+                if (selectedIds.indexOf(idStr) !== -1) {
+                    input.checked = true;
+                }
+
+                var span = document.createElement('span');
+                span.className = 'blog-multi-option__label';
+                span.textContent = (item[labelKey] || '').toString();
+
+                label.appendChild(input);
+                label.appendChild(span);
+                listEl.appendChild(label);
+            });
+        }
+
+        function fetchAndRender(endpoint, q, selectedName, listEl, labelKey, idPrefix) {
+            var selectedIds = getSelectedIds(selectedName);
+            var params = new URLSearchParams();
+            if (q) params.set('q', q);
+            if (selectedIds.length) params.set('selected', selectedIds.join(','));
+
+            return fetch(endpoint + '?' + params.toString(), {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(function(resp) { return resp.json(); })
+                .then(function(json) {
+                    var items = json && Array.isArray(json.data) ? json.data : [];
+                    renderOptions(listEl, selectedName, items, selectedIds, labelKey, idPrefix);
+                })
+                .catch(function() {
+                    renderOptions(listEl, selectedName, [], selectedIds, labelKey, idPrefix);
+                });
+        }
+
+        var kategoriForm = document.getElementById('kategoriSearchForm');
+        var kategoriInput = document.getElementById('kategoriSearchInput');
+        var kategoriClear = document.getElementById('kategoriSearchClear');
+        var kategoriSubmit = document.getElementById('kategoriSearchSubmit');
+        var kategoriList = document.getElementById('kategoriList');
+
+        if (kategoriForm && kategoriInput && kategoriClear && kategoriSubmit && kategoriList) {
+            function doKategoriSearch() {
+                var q = (kategoriInput.value || '').toString().trim();
+                fetchAndRender('/pustakawan/blog/kategori/search', q, 'kategori[]', kategoriList, 'nama_kategori', 'kategori');
+            }
+
+            kategoriSubmit.addEventListener('click', function() {
+                doKategoriSearch();
+            });
+
+            kategoriInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    doKategoriSearch();
+                }
+            });
+
+            kategoriClear.addEventListener('click', function() {
+                kategoriInput.value = '';
+                fetchAndRender('/pustakawan/blog/kategori/search', '', 'kategori[]', kategoriList, 'nama_kategori', 'kategori');
+            });
+        }
+
+        var tagForm = document.getElementById('tagSearchForm');
+        var tagInput = document.getElementById('tagSearchInput');
+        var tagClear = document.getElementById('tagSearchClear');
+        var tagSubmit = document.getElementById('tagSearchSubmit');
+        var tagList = document.getElementById('tagList');
+
+        if (tagForm && tagInput && tagClear && tagSubmit && tagList) {
+            function doTagSearch() {
+                var q = (tagInput.value || '').toString().trim();
+                fetchAndRender('/pustakawan/blog/tag/search', q, 'tag[]', tagList, 'nama_tag', 'tag');
+            }
+
+            tagSubmit.addEventListener('click', function() {
+                doTagSearch();
+            });
+
+            tagInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    doTagSearch();
+                }
+            });
+
+            tagClear.addEventListener('click', function() {
+                tagInput.value = '';
+                fetchAndRender('/pustakawan/blog/tag/search', '', 'tag[]', tagList, 'nama_tag', 'tag');
+            });
+        }
     }
 
     function initAll() {

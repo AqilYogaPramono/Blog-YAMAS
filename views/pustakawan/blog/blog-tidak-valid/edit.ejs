@@ -77,6 +77,19 @@
                                     <div class="blog-multi-select-head">
                                         <p class="mb-0 text-muted">Pilih kategori</p>
                                     </div>
+                                    <div id="kategoriSearchForm" class="pengumuman-search-form mb-3" data-loading-skip="true" autocomplete="off">
+                                        <div class="pengumuman-search">
+                                            <div class="search-input-wrapper">
+                                                <input id="kategoriSearchInput" type="text" class="form-control" name="q" placeholder="Cari nama kategori...">
+                                                <button type="button" class="search-clear-btn" id="kategoriSearchClear" aria-label="Bersihkan pencarian">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="search-actions">
+                                                <button id="kategoriSearchSubmit" class="btn btn-primary search-submit" type="button">Cari</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div id="kategoriList" class="blog-multi-select-grid">
                                         <% if (Array.isArray(kategori) && kategori.length) { %>
                                             <% kategori.forEach(function(item){ %>
@@ -97,6 +110,19 @@
                                 <div class="blog-multi-select-card">
                                     <div class="blog-multi-select-head">
                                         <p class="mb-0 text-muted">Pilih tag</p>
+                                    </div>
+                                    <div id="tagSearchForm" class="pengumuman-search-form mb-3" data-loading-skip="true" autocomplete="off">
+                                        <div class="pengumuman-search">
+                                            <div class="search-input-wrapper">
+                                                <input id="tagSearchInput" type="text" class="form-control" name="q" placeholder="Cari nama tag...">
+                                                <button type="button" class="search-clear-btn" id="tagSearchClear" aria-label="Bersihkan pencarian">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="search-actions">
+                                                <button id="tagSearchSubmit" class="btn btn-primary search-submit" type="button">Cari</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div id="tagList" class="blog-multi-select-grid">
                                         <% if (Array.isArray(tag) && tag.length) { %>

@@ -20,6 +20,25 @@ class Tag {
         }
     }
 
+    static async getByIds(ids) {
+        const normalized = (Array.isArray(ids) ? ids : [ids])
+            .map((item) => (item || '').toString().trim())
+            .filter(Boolean)
+
+        const uniqueIds = [...new Set(normalized)]
+        if (!uniqueIds.length) {
+            return []
+        }
+
+        const placeholders = uniqueIds.map(() => '?').join(', ')
+        try {
+            const [rows] = await connection.query(`SELECT * FROM tag WHERE id IN (${placeholders}) ORDER BY id DESC`, uniqueIds)
+            return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
     static async store(data) {
         try {
             const [result] = await connection.query(`INSERT INTO tag SET ?`, [data])
@@ -77,6 +96,20 @@ class Tag {
     static async searchByNama(nama) {
         try {
             const [rows] = await connection.query(`SELECT * FROM tag WHERE nama_tag LIKE ? ORDER BY id ASC`, [`%${nama}%`])
+            return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async searchByNamaLatest(nama, limit = 50) {
+        const keyword = (nama || '').toString().trim()
+        const size = Math.max(1, Math.min(Number(limit) || 50, 200))
+        try {
+            const [rows] = await connection.query(
+                `SELECT * FROM tag WHERE nama_tag LIKE ? ORDER BY id DESC LIMIT ?`,
+                [`%${keyword}%`, size]
+            )
             return rows
         } catch (err) {
             throw err

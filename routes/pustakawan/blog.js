@@ -40,7 +40,7 @@ const storage = multer.diskStorage({
     }
 })
 
-const upload = multer({storage})
+const upload = multer({ storage })
 
 const deleteUploadedFile = (file) => {
     if (!file || !file.filename) return
@@ -82,19 +82,130 @@ const isSixteenByNinePhoto = async (filePath, tolerance = 0.02) => {
 router.get('/buat', authPustakawan, async (req, res) => {
     try {
         const pegawai = await Pegawai.getNama(req.session.pegawaiId)
-        const kategori = await Kategori.getLatest(10)
-        const tag = await Tag.getLatest(10)
+        const data = req.flash('data')[0] || {}
+        const kategoriSelected = normalizeIds(data.kategori || data['kategori[]'])
+        const tagSelected = normalizeIds(data.tag || data['tag[]'])
+
+        const [kategoriLatest, tagLatest, kategoriPicked, tagPicked] = await Promise.all([
+            Kategori.getLatest(5),
+            Tag.getLatest(5),
+            kategoriSelected.length ? Kategori.getByIds(kategoriSelected) : Promise.resolve([]),
+            tagSelected.length ? Tag.getByIds(tagSelected) : Promise.resolve([])
+        ])
+
+        const kategoriMap = new Map()
+        kategoriPicked.forEach((item) => kategoriMap.set(String(item.id), item))
+        kategoriLatest.forEach((item) => kategoriMap.set(String(item.id), item))
+
+        const tagMap = new Map()
+        tagPicked.forEach((item) => tagMap.set(String(item.id), item))
+        tagLatest.forEach((item) => tagMap.set(String(item.id), item))
 
         res.render('pustakawan/blog/buat', {
             pegawai,
-            kategori,
-            tag,
-            data: req.flash('data')[0] || {}
+            kategori: Array.from(kategoriMap.values()),
+            tag: Array.from(tagMap.values()),
+            data
         })
     } catch (err) {
         console.error(err)
         req.flash('error', 'Internal Server Error')
         return res.redirect('/pustakawan/dashboard')
+    }
+})
+
+router.get('/kategori/search', authPustakawan, async (req, res) => {
+    try {
+        const q = (req.query.q || '').toString().trim()
+        const selectedRaw = req.query.selected
+        const selectedIds = normalizeIds(
+            Array.isArray(selectedRaw)
+                ? selectedRaw.flatMap((item) => (item || '').toString().split(','))
+                : (selectedRaw ? selectedRaw.toString().split(',') : [])
+        )
+
+        const [results, selectedItems] = await Promise.all([
+            q ? Kategori.searchByNamaLatest(q, 50) : Kategori.getLatest(5),
+            selectedIds.length ? Kategori.getByIds(selectedIds) : Promise.resolve([])
+        ])
+
+        const map = new Map()
+        selectedItems.forEach((item) => map.set(String(item.id), item))
+        results.forEach((item) => map.set(String(item.id), item))
+
+        const selectedFirst = []
+        selectedItems.forEach((item) => {
+            const key = String(item.id)
+            if (map.has(key)) selectedFirst.push(map.get(key))
+            map.delete(key)
+        })
+
+        return res.json({ data: [...selectedFirst, ...Array.from(map.values())] })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ data: [] })
+    }
+})
+
+router.get('/tag/search', authPustakawan, async (req, res) => {
+    try {
+        const q = (req.query.q || '').toString().trim()
+        const selectedRaw = req.query.selected
+        const selectedIds = normalizeIds(
+            Array.isArray(selectedRaw)
+                ? selectedRaw.flatMap((item) => (item || '').toString().split(','))
+                : (selectedRaw ? selectedRaw.toString().split(',') : [])
+        )
+
+        const [results, selectedItems] = await Promise.all([
+            q ? Tag.searchByNamaLatest(q, 50) : Tag.getLatest(5),
+            selectedIds.length ? Tag.getByIds(selectedIds) : Promise.resolve([])
+        ])
+
+        const map = new Map()
+        selectedItems.forEach((item) => map.set(String(item.id), item))
+        results.forEach((item) => map.set(String(item.id), item))
+
+        const selectedFirst = []
+        selectedItems.forEach((item) => {
+            const key = String(item.id)
+            if (map.has(key)) selectedFirst.push(map.get(key))
+            map.delete(key)
+        })
+
+        return res.json({ data: [...selectedFirst, ...Array.from(map.values())] })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ data: [] })
+    }
+})
+
+router.post('/upload-editor-image', authPustakawan, upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ url: null })
+        }
+
+        const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
+        if (!allowedFormats.includes(req.file.mimetype)) {
+            deleteUploadedFile(req.file)
+            return res.status(400).json({ url: null })
+        }
+
+        const result = await convertImageFile(req.file.path)
+        if (!result) {
+            deleteUploadedFile(req.file)
+            return res.status(500).json({ url: null })
+        }
+
+        const url = '/images/blog/' + path.basename(result.outputPath)
+        return res.json({ url })
+    } catch (err) {
+        console.error(err)
+        if (req.file) {
+            deleteUploadedFile(req.file)
+        }
+        return res.status(500).json({ url: null })
     }
 })
 

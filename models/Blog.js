@@ -330,7 +330,7 @@ class Blog {
     static async getRandomRelatedByBlogId(idBlog) {
         try {
 
-            const [rows] = await connection.query(`SELECT DISTINCT b.id, b.tautan, b.judul, b.foto_cover, b.dibuat_pada FROM blog b LEFT JOIN tag_blog tb ON b.id = tb.id_blog LEFT JOIN kategori_blog kb ON b.id = kb.id_blog WHERE b.status = 'Valid' AND b.id != ? AND (tb.id_tag IN (SELECT id_tag FROM tag_blog WHERE id_blog = ?) OR kb.id_kategori IN (SELECT id_kategori FROM kategori_blog WHERE id_blog = ?)) ORDER BY RAND() LIMIT 5`, [idBlog, idBlog, idBlog])
+            const [rows] = await connection.query(`SELECT DISTINCT b.id, b.tautan, b.judul, b.foto_cover, b.dibuat_pada FROM blog b LEFT JOIN tag_blog tb ON b.id = tb.id_blog LEFT JOIN kategori_blog kb ON b.id = kb.id_blog WHERE b.status = 'Valid' AND b.id != ? AND (tb.id_tag IN (SELECT id_tag FROM tag_blog WHERE id_blog = ?) OR kb.id_kategori IN (SELECT id_kategori FROM kategori_blog WHERE id_blog = ?)) ORDER BY RAND() LIMIT 6`, [idBlog, idBlog, idBlog])
             return rows
         } catch (err) {
             throw err
@@ -369,6 +369,24 @@ class Blog {
         }
     }
 
+    static async getCountBlogByTagId(idTag) {
+        try {
+            const [rows] = await connection.query(`SELECT COUNT(b.id) AS total_blog FROM blog b INNER JOIN tag_blog tb ON b.id = tb.id_blog WHERE b.status = 'Valid' AND tb.id_tag = ?`, [idTag])
+            return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async getCountBlogByKategoriId(idKategori) {
+        try {
+            const [rows] = await connection.query(`SELECT COUNT(b.id) AS total_blog FROM blog b INNER JOIN kategori_blog kb ON b.id = kb.id_blog WHERE b.status = 'Valid' AND kb.id_kategori = ?`, [idKategori])
+            return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
     static async searchJudulBlog(keyword, idPegawai) {
         try {
             const [rows] = await connection.query(`SELECT id,tautan,judul,nama_pembuat,status,dibuat_pada,diverifikasi_oleh FROM blog WHERE status = 'Proses' AND id_pegawai = ? AND judul LIKE CONCAT('%', ?, '%') ORDER BY dibuat_pada DESC`,[idPegawai, keyword])
@@ -391,6 +409,40 @@ class Blog {
         try {
             const [rows] = await connection.query(`SELECT id, tautan, judul, nama_pembuat, status, dibuat_pada, diverifikasi_oleh FROM blog WHERE status = ? AND judul LIKE CONCAT('%', ?, '%') ORDER BY dibuat_pada DESC`, [status, keyword])
             return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async getForAPI(limit, offset) {
+        try {
+            const [rows] = await connection.query(`SELECT id, tautan, judul, foto_cover, ringkasan, nama_pembuat, dibuat_pada FROM blog WHERE status = 'Valid' ORDER BY diverifikasi_pada DESC, dibuat_pada DESC LIMIT ? OFFSET ?`, [limit, offset])
+            return rows.map((row) => ({
+                ...row,
+                foto_cover: Blog.normalizeImagePath(row.foto_cover)
+            }))
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async getCountBlog() {
+        try {
+            const [rows] = await connection.query(`SELECT COUNT(id) AS total_blog FROM blog WHERE status = 'Valid'`)
+            return rows
+        } catch (err) {
+            throw err
+        }
+    }
+
+    static async searchByJudulForAPI(keyword) {
+        try {
+            const likeKeyword = `%${keyword}%`
+            const [rows] = await connection.query(`SELECT id, tautan, judul, foto_cover, ringkasan, nama_pembuat, dibuat_pada FROM blog WHERE status = 'Valid' AND judul LIKE ? ORDER BY diverifikasi_pada DESC, dibuat_pada DESC`, [likeKeyword])
+            return rows.map((row) => ({
+                ...row,
+                foto_cover: Blog.normalizeImagePath(row.foto_cover)
+            }))
         } catch (err) {
             throw err
         }

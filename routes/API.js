@@ -7,12 +7,40 @@ const router = express.Router()
 
 router.get('/blog', async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit, 10) || 50
-        const offset = parseInt(req.query.offset, 10) || 0
+        const page = parseInt(req.query.page) || 1
+        const limit = 15
+        const offset = (page - 1) * limit
+        
+        const blog = await Blog.getForAPI(limit, offset)
+        const countResult = await Blog.getCountBlog()
+        const totalBlog = countResult[0].total_blog
+        const totalHalaman = Math.ceil(totalBlog / limit)
+        
+        res.status(200).json({ 
+            blog,
+            pagination: {
+                page,
+                limit,
+                totalBlog,
+                totalHalaman
+            }
+        })
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({message: 'Internal Server Error'})
+    }
+})
 
-        const data = await Blog.getAllValidOrderedByVerified(limit, offset)
+router.post('/blog/search', async(req, res) => {
+    try {
+        const { keyword } = req.body
+        
+        if (!keyword || !keyword.trim()) {
+            return res.status(400).json({message: 'Keyword tidak boleh kosong'})
+        }
 
-        res.json({ data })
+        const blog = await Blog.searchByJudulForAPI(keyword.trim())
+        res.status(200).json({ blog })
     } catch (err) {
         console.error(err)
         res.status(500).json({message: 'Internal Server Error'})
@@ -52,15 +80,25 @@ router.get('/blog/:tautan', async (req, res) => {
 router.get('/tag/:id', async (req, res) => {
     try {
         const {id} = req.params
-        const limit = parseInt(req.query.limit, 10) || 50
-        const offset = parseInt(req.query.offset, 10) || 0
+        const page = parseInt(req.query.page) || 1
+        const limit = 15
+        const offset = (page - 1) * limit
 
         const tag = await Tag.getById(id)
         const data = await Blog.getValidByTagId(id, limit, offset)
+        const countResult = await Blog.getCountBlogByTagId(id)
+        const totalBlog = countResult[0].total_blog
+        const totalHalaman = Math.ceil(totalBlog / limit)
 
-        res.json({ 
+        res.status(200).json({ 
             data,
-            tag: tag ? { id: tag.id, nama_tag: tag.nama_tag } : null
+            tag: tag ? { id: tag.id, nama_tag: tag.nama_tag } : null,
+            pagination: {
+                page,
+                limit,
+                totalBlog,
+                totalHalaman
+            }
         })
     } catch (err) {
         console.error(err)
@@ -71,15 +109,25 @@ router.get('/tag/:id', async (req, res) => {
 router.get('/kategori/:id', async (req, res) => {
     try {
         const {id} = req.params
-        const limit = parseInt(req.query.limit, 10) || 50
-        const offset = parseInt(req.query.offset, 10) || 0
+        const page = parseInt(req.query.page) || 1
+        const limit = 15
+        const offset = (page - 1) * limit
 
         const kategori = await Kategori.getById(id)
         const data = await Blog.getValidByKategoriId(id, limit, offset)
+        const countResult = await Blog.getCountBlogByKategoriId(id)
+        const totalBlog = countResult[0].total_blog
+        const totalHalaman = Math.ceil(totalBlog / limit)
 
-        res.json({ 
+        res.status(200).json({ 
             data,
-            kategori: kategori ? { id: kategori.id, nama_kategori: kategori.nama_kategori } : null
+            kategori: kategori ? { id: kategori.id, nama_kategori: kategori.nama_kategori } : null,
+            pagination: {
+                page,
+                limit,
+                totalBlog,
+                totalHalaman
+            }
         })
     } catch (err) {
         console.error(err)

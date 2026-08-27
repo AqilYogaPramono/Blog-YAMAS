@@ -89,7 +89,7 @@ router.post('/ubah-kata-sandi', authPustakawan, async (req, res) => {
         
         await Pegawai.changePassword(req.session.pegawaiId, data)
         req.flash('success', 'Kata sandi berhasil diperbarui')
-        res.redirect('/pustakawan/dashboard')
+        res.redirect('/masuk-pustakawan')
     } catch (err) {
         console.error(err)
         req.flash('error', 'Internal Server Error')

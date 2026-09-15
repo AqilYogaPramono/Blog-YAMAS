@@ -1,9 +1,12 @@
 const express = require('express')
+const { onlyDomain } = require('../middlewares/cors-option')
 const Blog = require('../models/Blog')
 const Kategori = require('../models/Kategori')
 const Tag = require('../models/Tag')
 
 const router = express.Router()
+
+router.use(onlyDomain)
 
 router.get('/blog', async (req, res) => {
     try {

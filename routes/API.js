@@ -10,13 +10,13 @@ router.get('/blog', async (req, res) => {
         const page = parseInt(req.query.page) || 1
         const limit = 15
         const offset = (page - 1) * limit
-        
+
         const blog = await Blog.getForAPI(limit, offset)
         const countResult = await Blog.getCountBlog()
         const totalBlog = countResult[0].total_blog
         const totalHalaman = Math.ceil(totalBlog / limit)
-        
-        res.status(200).json({ 
+
+        res.status(200).json({
             blog,
             pagination: {
                 page,
@@ -27,30 +27,30 @@ router.get('/blog', async (req, res) => {
         })
     } catch (err) {
         console.error(err)
-        res.status(500).json({message: 'Internal Server Error'})
+        res.status(500).json({ message: 'Internal Server Error' })
     }
 })
 
-router.post('/blog/search', async(req, res) => {
+router.post('/blog/search', async (req, res) => {
     try {
         const { keyword } = req.body
-        
+
         if (!keyword || !keyword.trim()) {
-            return res.status(400).json({message: 'Keyword tidak boleh kosong'})
+            return res.status(400).json({ message: 'Keyword tidak boleh kosong' })
         }
 
         const blog = await Blog.searchByJudulForAPI(keyword.trim())
         res.status(200).json({ blog })
     } catch (err) {
         console.error(err)
-        res.status(500).json({message: 'Internal Server Error'})
+        res.status(500).json({ message: 'Internal Server Error' })
     }
 })
 
 router.get('/blog/:tautan', async (req, res) => {
     try {
-        
-        const {tautan} = req.params
+
+        const { tautan } = req.params
 
         const blog = await Blog.getBySlugWithRelations(tautan)
 
@@ -66,20 +66,20 @@ router.get('/blog/:tautan', async (req, res) => {
                 nama_pembuat: blog.nama_pembuat,
                 isi: blog.isi,
                 dibuat_pada: blog.dibuat_pada,
-                tag: blog.tag.map((t) => ({id: t.id, nama_tag: t.nama_tag})),
-                kategori: blog.kategori.map((k) => ({id: k.id, nama_kategori: k.nama_kategori})),
+                tag: blog.tag.map((t) => ({ id: t.id, nama_tag: t.nama_tag })),
+                kategori: blog.kategori.map((k) => ({ id: k.id, nama_kategori: k.nama_kategori })),
                 related
             }
         })
     } catch (err) {
         console.error(err)
-        res.status(500).json({ message: 'Internal Server Error'})
+        res.status(500).json({ message: 'Internal Server Error' })
     }
 })
 
 router.get('/tag/:id', async (req, res) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const page = parseInt(req.query.page) || 1
         const limit = 15
         const offset = (page - 1) * limit
@@ -90,7 +90,7 @@ router.get('/tag/:id', async (req, res) => {
         const totalBlog = countResult[0].total_blog
         const totalHalaman = Math.ceil(totalBlog / limit)
 
-        res.status(200).json({ 
+        res.status(200).json({
             data,
             tag: tag ? { id: tag.id, nama_tag: tag.nama_tag } : null,
             pagination: {
@@ -108,7 +108,7 @@ router.get('/tag/:id', async (req, res) => {
 
 router.get('/kategori/:id', async (req, res) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const page = parseInt(req.query.page) || 1
         const limit = 15
         const offset = (page - 1) * limit
@@ -119,7 +119,7 @@ router.get('/kategori/:id', async (req, res) => {
         const totalBlog = countResult[0].total_blog
         const totalHalaman = Math.ceil(totalBlog / limit)
 
-        res.status(200).json({ 
+        res.status(200).json({
             data,
             kategori: kategori ? { id: kategori.id, nama_kategori: kategori.nama_kategori } : null,
             pagination: {
